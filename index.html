@@ -360,11 +360,13 @@
       hintTraceCert:"The certificate number of the reference standard used for this calibration — this is what proves the result is traceable to a national or international standard.",
       hintErrorFound:"The actual deviation measured during this test — compare it against the Tolerance / EMP above to judge the result.",
       hintUncertainty:"Optional — leave blank if you don't have this value. If External, copy it from the lab's certificate. If Internal, use your site's validated uncertainty budget for this instrument type, if one exists. k=2 means ≈95% confidence.",
-      cancel:"Cancel", saveChanges:"Save Changes", addEquipmentSubmit:"Add Equipment",
+      cancel:"Cancel", saveChanges:"Save Changes", addEquipmentSubmit:"Add Equipment", close:"Close",
       errRequired:"Please complete all required fields before saving.",
       errDuplicateId:"An equipment with this Equipment ID already exists. Please use a unique inventory code.",
       errInvalidEmail:"Please enter a valid email address for the responsible technician.",
       titleRegisterEvent:"Register Calibration Event", titleEditEquipment:"Edit Equipment", titleDeleteEquipment:"Delete Equipment",
+      titleViewEquipment:"View Details", viewEquipmentTitle:"Equipment Details",
+      viewOnlyNotice:"You can only edit equipment you registered yourself. Contact an administrator if this record needs to change.",
       registerEventTitle:"Register Calibration Event", selectEquipmentSub:"Select equipment to calibrate",
       fieldEquipment:"Equipment", f_testDate:"Test Date", f_calibrationType:"Calibration Performed",
       typeInternal:"Internal", typeExternal:"External",
@@ -468,11 +470,13 @@
       hintTraceCert:"El número de certificado del patrón de referencia usado en esta calibración — esto es lo que demuestra que el resultado es trazable a un patrón nacional o internacional.",
       hintErrorFound:"La desviación real medida durante este ensayo — compárela con la Tolerancia / EMP de arriba para juzgar el resultado.",
       hintUncertainty:"Opcional — déjelo en blanco si no cuenta con este valor. Si es Externa, cópielo del certificado del laboratorio. Si es Interna, use el presupuesto de incertidumbre ya validado de su site para este tipo de instrumento, si existe. k=2 significa ≈95% de confianza.",
-      cancel:"Cancelar", saveChanges:"Guardar Cambios", addEquipmentSubmit:"Agregar Equipo",
+      cancel:"Cancelar", saveChanges:"Guardar Cambios", addEquipmentSubmit:"Agregar Equipo", close:"Cerrar",
       errRequired:"Por favor complete todos los campos obligatorios antes de guardar.",
       errDuplicateId:"Ya existe un equipo con este ID. Por favor use un código de inventario único.",
       errInvalidEmail:"Por favor ingrese un correo electrónico válido para el técnico responsable.",
       titleRegisterEvent:"Registrar Evento de Calibración", titleEditEquipment:"Editar Equipo", titleDeleteEquipment:"Eliminar Equipo",
+      titleViewEquipment:"Ver Detalle", viewEquipmentTitle:"Detalle del Equipo",
+      viewOnlyNotice:"Solo puedes editar equipos que tú mismo registraste. Contacta a un administrador si este registro necesita cambiar.",
       registerEventTitle:"Registrar Evento de Calibración", selectEquipmentSub:"Seleccione el equipo a calibrar",
       fieldEquipment:"Equipo", f_testDate:"Fecha del Ensayo", f_calibrationType:"Calibración Realizada",
       typeInternal:"Interna", typeExternal:"Externa",
@@ -576,11 +580,13 @@
       hintTraceCert:"本次校准所用参考标准器的证书编号——用以证明结果可溯源至国家或国际标准。",
       hintErrorFound:"本次检测中实际测得的偏差——请与上方的公差/最大允许误差对比以判断结果。",
       hintUncertainty:"可选项——如没有该数值可留空。若为外部校准，请从实验室证书中抄录该数值；若为内部校准，如已有针对该类仪器验证过的不确定度预算，可使用该数值。k=2表示约95%置信水平。",
-      cancel:"取消", saveChanges:"保存更改", addEquipmentSubmit:"新增设备",
+      cancel:"取消", saveChanges:"保存更改", addEquipmentSubmit:"新增设备", close:"关闭",
       errRequired:"保存前请填写所有必填字段。",
       errDuplicateId:"该设备编号已存在，请使用唯一的库存代码。",
       errInvalidEmail:"请输入负责技术员的有效电子邮箱。",
       titleRegisterEvent:"登记校准事件", titleEditEquipment:"编辑设备", titleDeleteEquipment:"删除设备",
+      titleViewEquipment:"查看详情", viewEquipmentTitle:"设备详情",
+      viewOnlyNotice:"您只能编辑自己登记的设备。如需修改此记录，请联系管理员。",
       registerEventTitle:"登记校准事件", selectEquipmentSub:"选择要校准的设备",
       fieldEquipment:"设备", f_testDate:"检测日期", f_calibrationType:"校准执行方式",
       typeInternal:"内部", typeExternal:"外部",
@@ -739,6 +745,7 @@
       lastCalibration: r.last_calibration, nextCalibration: r.next_calibration, manualStatus: r.manual_status,
       unit: r.unit, rangeMin: r.range_min, rangeMax: r.range_max, emp: r.emp,
       responsibleName: r.responsible_name, responsibleEmail: r.responsible_email,
+      createdBy: r.created_by,
       tech: "", traceCert: "", uncertainty: "", calibrationHistory: []
     };
   }
@@ -788,6 +795,7 @@
     authNotice: null
   };
   function isAdmin(){ return !!(state.profile && state.profile.role === "admin"); }
+  function canEditEq(eq){ return isAdmin() || !!(state.session && eq && eq.createdBy && eq.createdBy === state.session.user.id); }
 
   /* =====================================================================
      DERIVED
@@ -1091,7 +1099,7 @@
         '<td><div class="cell-name">'+esc(eq.responsibleName||"—")+'</div><div class="cell-sub">'+esc(eq.responsibleEmail||"")+'</div></td>' +
         '<td><div class="row-actions">' +
           iconBtn("log","open-event",eq.id,T("titleRegisterEvent")) +
-          iconBtn("edit","edit-equipment",eq.id,T("titleEditEquipment")) +
+          (canEditEq(eq) ? iconBtn("edit","edit-equipment",eq.id,T("titleEditEquipment")) : iconBtn("view","view-equipment",eq.id,T("titleViewEquipment"))) +
           (isAdmin() ? iconBtn("trash","delete-equipment",eq.id,T("titleDeleteEquipment"),true) : "") +
         '</div></td>' +
       '</tr>';
@@ -1133,7 +1141,8 @@
     var paths = {
       log:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
       edit:'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>',
-      trash:'<path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>'
+      trash:'<path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>',
+      view:'<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/>'
     };
     return '<button class="icon-btn'+(danger?" danger":"")+'" data-action="'+action+'" data-id="'+id+'" title="'+esc(title)+'" aria-label="'+esc(title)+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">'+paths[icon]+'</svg></button>';
   }
@@ -1350,7 +1359,7 @@
   function modalHtml(){
     if(!state.modal) return "";
     var m = state.modal;
-    if(m.type === "equipment") return equipmentModalHtml(m.data);
+    if(m.type === "equipment") return equipmentModalHtml(m.data, m.readOnly);
     if(m.type === "event") return eventModalHtml(m.data);
     if(m.type === "confirm-delete") return confirmDeleteModalHtml(m.data);
     return "";
@@ -1363,60 +1372,71 @@
     var span = opts.span2 ? ' span-2' : '';
     var input = "";
     if(kind === "select"){
-      input = '<select name="'+name+'">'+opts.options+'</select>';
+      input = '<select name="'+name+'"'+(opts.disabled?" disabled":"")+'>'+opts.options+'</select>';
     } else {
       input = '<input type="'+(opts.type||"text")+'" name="'+name+'" value="'+esc(value)+'"' +
         (opts.required?" required":"") + (opts.step!=null?' step="'+opts.step+'"':"") + (opts.readonly?" readonly":"") +
+        (opts.disabled?" disabled":"") +
         (opts.placeholder?' placeholder="'+esc(opts.placeholder)+'"':"") + '/>';
     }
     return '<div class="field'+span+'"><label>'+esc(labelKey)+(opts.required?' <span class="req">*</span>':'')+'</label>'+input+(opts.hint?'<div class="hint">'+esc(opts.hint)+'</div>':'')+'</div>';
   }
-  function fieldSelect(labelKey, name, value, pairs, required, hint, selectId){
+  function fieldSelect(labelKey, name, value, pairs, required, hint, selectId, disabled){
     var opts = pairs.map(function(p){ return '<option value="'+p[0]+'"'+(value===p[0]?" selected":"")+'>'+esc(p[1])+'</option>'; }).join("");
-    return '<div class="field"><label>'+esc(labelKey)+(required?' <span class="req">*</span>':'')+'</label><select name="'+name+'"'+(selectId?' id="'+selectId+'"':'')+'>'+opts+'</select>'+(hint?'<div class="hint">'+esc(hint)+'</div>':'')+'</div>';
+    return '<div class="field"><label>'+esc(labelKey)+(required?' <span class="req">*</span>':'')+'</label><select name="'+name+'"'+(selectId?' id="'+selectId+'"':'')+(disabled?" disabled":"")+'>'+opts+'</select>'+(hint?'<div class="hint">'+esc(hint)+'</div>':'')+'</div>';
   }
 
-  function equipmentModalHtml(eq){
+  function equipmentModalHtml(eq, readOnly){
     var isEdit = !!eq;
+    var viewOnly = !!readOnly;
     var v = eq || {id:"", tag:"", name:"", manufacturer:"", model:"", serial:"", unit:"", rangeMin:"", rangeMax:"", emp:"", area:AREAS[0], criticality:"Medium", frequencyMonths:12, lastCalibration:TODAY_STR, manualStatus:"Approved", siteId:state.currentSite, responsibleName:"", responsibleEmail:""};
     var areaOpts = AREAS.map(function(a){ return '<option value="'+a+'"'+(v.area===a?" selected":"")+'>'+esc(areaLabel(a))+'</option>'; }).join("");
     var siteOpts = SITES.map(function(s){ return '<option value="'+s.id+'"'+(v.siteId===s.id?" selected":"")+'>'+esc(s.name)+' — '+esc(regionLabel(s.region))+'</option>'; }).join("");
 
     var errorHtml = state.formError ? '<div class="form-error">'+esc(state.formError)+'</div>' : "";
+    var noticeHtml = viewOnly ? '<div class="hint" style="margin-top:8px;">'+esc(T("viewOnlyNotice"))+'</div>' : "";
+    function d(o){ return viewOnly ? Object.assign({}, o, {disabled:true}) : o; }
+
+    var titleText = viewOnly ? T("viewEquipmentTitle") : (isEdit?T("editEquipmentTitle"):T("addEquipmentTitle"));
+    var tagOpen = viewOnly ? '<div>' : '<form id="equipment-form" data-id="'+esc(v.id||"")+'">';
+    var tagClose = viewOnly ? '</div>' : '</form>';
+    var footer = viewOnly ?
+      '<div class="modal-foot"><button type="button" class="btn btn-primary" data-action="close-modal">'+esc(T("close"))+'</button></div>' :
+      '<div class="modal-foot">' +
+        '<button type="button" class="btn btn-ghost" data-action="close-modal">'+esc(T("cancel"))+'</button>' +
+        '<button type="submit" class="btn btn-primary">'+esc(isEdit?T("saveChanges"):T("addEquipmentSubmit"))+'</button>' +
+      '</div>';
 
     var inner = '' +
-      '<div class="modal-head"><div><h3>'+esc(isEdit?T("editEquipmentTitle"):T("addEquipmentTitle"))+'</h3><div class="sub">'+esc(T("assetMasterDataSub"))+' '+esc(siteName(v.siteId))+'</div></div></div>' +
-      '<form id="equipment-form" data-id="'+esc(v.id||"")+'">' +
+      '<div class="modal-head"><div><h3>'+esc(titleText)+'</h3><div class="sub">'+esc(T("assetMasterDataSub"))+' '+esc(siteName(v.siteId))+'</div></div></div>' +
+      tagOpen +
         '<div class="modal-body">' +
           '<div class="form-grid">' +
-            field(T("f_equipmentId"),"input","code",isEdit?v.id:"",{required:true, readonly:isEdit, placeholder:"BRK-EQ-0009"}) +
-            field(T("f_assetTag"),"input","tag",v.tag,{required:true, placeholder:"PYR-IMM-02"}) +
-            field(T("f_equipmentName"),"input","name",v.name,{required:true, span2:true}) +
-            field(T("f_manufacturer"),"input","manufacturer",v.manufacturer,{required:true}) +
-            field(T("f_model"),"input","model",v.model,{required:true}) +
-            field(T("f_serial"),"input","serial",v.serial,{required:true}) +
-            field(T("f_manufacturingSite"),"select","siteId",v.siteId,{options:siteOpts}) +
-            field(T("f_unit"),"input","unit",v.unit,{required:true, placeholder:"°C, mm, kg…"}) +
-            field(T("f_rangeMin"),"input","rangeMin",v.rangeMin,{type:"number", step:"any", required:true, hint:T("hintRange")}) +
-            field(T("f_rangeMax"),"input","rangeMax",v.rangeMax,{type:"number", step:"any", required:true, hint:T("hintRange")}) +
-            field(T("f_tolerance"),"input","emp",v.emp,{required:true, placeholder:"± 0.02 mm", hint:T("hintTolerance")}) +
-            field(T("f_area"),"select","area",v.area,{options:areaOpts}) +
-            fieldSelect(T("f_criticality"),"criticality",v.criticality,[["High",T("critHigh")],["Medium",T("critMedium")],["Low",T("critLow")]],true,T("hintCriticality")) +
-            field(T("f_frequency"),"input","frequencyMonths",v.frequencyMonths,{type:"number", required:true, hint:T("hintFrequency")}) +
-            field(T("f_lastCal"),"input","lastCalibration",v.lastCalibration,{type:"date", required:true}) +
-            fieldSelect(T("f_status"),"manualStatus",v.manualStatus,[["Approved",statusLabel("Approved")],["Conditional",statusLabel("Conditional")],["Out of Service",statusLabel("Out of Service")]],true,T("hintStatus")) +
+            field(T("f_equipmentId"),"input","code",isEdit?v.id:"",d({required:true, readonly:isEdit, placeholder:"BRK-EQ-0009"})) +
+            field(T("f_assetTag"),"input","tag",v.tag,d({required:true, placeholder:"PYR-IMM-02"})) +
+            field(T("f_equipmentName"),"input","name",v.name,d({required:true, span2:true})) +
+            field(T("f_manufacturer"),"input","manufacturer",v.manufacturer,d({required:true})) +
+            field(T("f_model"),"input","model",v.model,d({required:true})) +
+            field(T("f_serial"),"input","serial",v.serial,d({required:true})) +
+            field(T("f_manufacturingSite"),"select","siteId",v.siteId,d({options:siteOpts})) +
+            field(T("f_unit"),"input","unit",v.unit,d({required:true, placeholder:"°C, mm, kg…"})) +
+            field(T("f_rangeMin"),"input","rangeMin",v.rangeMin,d({type:"number", step:"any", required:true, hint:T("hintRange")})) +
+            field(T("f_rangeMax"),"input","rangeMax",v.rangeMax,d({type:"number", step:"any", required:true, hint:T("hintRange")})) +
+            field(T("f_tolerance"),"input","emp",v.emp,d({required:true, placeholder:"± 0.02 mm", hint:T("hintTolerance")})) +
+            field(T("f_area"),"select","area",v.area,d({options:areaOpts})) +
+            fieldSelect(T("f_criticality"),"criticality",v.criticality,[["High",T("critHigh")],["Medium",T("critMedium")],["Low",T("critLow")]],true,T("hintCriticality"),null,viewOnly) +
+            field(T("f_frequency"),"input","frequencyMonths",v.frequencyMonths,d({type:"number", required:true, hint:T("hintFrequency")})) +
+            field(T("f_lastCal"),"input","lastCalibration",v.lastCalibration,d({type:"date", required:true})) +
+            fieldSelect(T("f_status"),"manualStatus",v.manualStatus,[["Approved",statusLabel("Approved")],["Conditional",statusLabel("Conditional")],["Out of Service",statusLabel("Out of Service")]],true,T("hintStatus"),null,viewOnly) +
           '</div>' +
           '<fieldset><legend>'+esc(T("fieldsetResp"))+'</legend><div class="form-grid">' +
-            field(T("f_respName"),"input","responsibleName",v.responsibleName,{required:true, placeholder:"Full name"}) +
-            field(T("f_respEmail"),"input","responsibleEmail",v.responsibleEmail,{type:"email", required:true, placeholder:"name@bradken.com"}) +
+            field(T("f_respName"),"input","responsibleName",v.responsibleName,d({required:true, placeholder:"Full name"})) +
+            field(T("f_respEmail"),"input","responsibleEmail",v.responsibleEmail,d({type:"email", required:true, placeholder:"name@bradken.com"})) +
           '</div><div class="hint" style="margin-top:8px;">'+esc(T("respHint"))+'</div></fieldset>' +
-          errorHtml +
+          errorHtml + noticeHtml +
         '</div>' +
-        '<div class="modal-foot">' +
-          '<button type="button" class="btn btn-ghost" data-action="close-modal">'+esc(T("cancel"))+'</button>' +
-          '<button type="submit" class="btn btn-primary">'+esc(isEdit?T("saveChanges"):T("addEquipmentSubmit"))+'</button>' +
-        '</div>' +
-      '</form>';
+        footer +
+      tagClose;
     return overlayWrap(inner);
   }
 
@@ -1564,8 +1584,17 @@
       case "open-add-equipment":
         state.formError = null; state.modal = {type:"equipment", data:null}; render();
         break;
-      case "edit-equipment":
-        state.formError = null; state.modal = {type:"equipment", data: findEq(t.dataset.id)}; render();
+      case "edit-equipment": {
+        var editEq = findEq(t.dataset.id);
+        state.formError = null;
+        state.modal = {type:"equipment", data: editEq, readOnly: !canEditEq(editEq)};
+        render();
+        break;
+      }
+      case "view-equipment":
+        state.formError = null;
+        state.modal = {type:"equipment", data: findEq(t.dataset.id), readOnly: true};
+        render();
         break;
       case "delete-equipment":
         state.modal = {type:"confirm-delete", data: findEq(t.dataset.id)}; render();
@@ -1749,6 +1778,7 @@
         data.id = code;
         data.tech = ""; data.traceCert = ""; data.uncertainty = "";
         data.calibrationHistory = [];
+        data.createdBy = state.session.user.id;
         state.equipment.push(data);
       }
       // Keep the saved equipment visible even if it was assigned to a different manufacturing site.
