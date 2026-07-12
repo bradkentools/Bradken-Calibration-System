@@ -1,0 +1,1907 @@
+<title>Bradken Global Equipment Calibration System</title>
+<style>
+  /* ================= DESIGN TOKENS — Bradken brand ================= */
+  :root{
+    --bg:#eef1f3;
+    --surface:#ffffff;
+    --surface-alt:#f4f6f8;
+    --border:#dbe0e4;
+    --border-strong:#bcc5cc;
+    --text:#181f26;
+    --text-dim:#4c5560;
+    --text-faint:#818b93;
+
+    --brand:#005293;
+    --brand-dark:#013f70;
+    --brand-light:#e6eef6;
+    --brand-contrast:#ffffff;
+    --logo-blue:#005293;
+
+    --gray:#7a7a7a;
+    --gray-dark:#54595f;
+
+    --ok:#1f7a44;    --ok-bg:#e3f3e8;   --ok-border:#a8d8ba;
+    --warn:#a3660a;  --warn-bg:#faecd7; --warn-border:#e9be82;
+    --crit:#b3261e;  --crit-bg:#fbe1df; --crit-border:#e7a8a3;
+    --oos:#5b5580;   --oos-bg:#eae7f3;  --oos-border:#c2bcd9;
+
+    --radius:8px;
+    --radius-sm:5px;
+    --shadow-sm:0 1px 2px rgba(15,25,35,.06);
+    --shadow-md:0 8px 24px rgba(15,25,35,.12);
+    --shadow-modal:0 14px 46px rgba(5,10,16,.35);
+
+    --font-ui: -apple-system,"Segoe UI","Helvetica Neue",Arial,sans-serif;
+    --font-mono: ui-monospace,"Cascadia Mono","SF Mono","Consolas","Roboto Mono",monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0c1116; --surface:#141b22; --surface-alt:#101620; --border:#26313b; --border-strong:#374553;
+      --text:#e7edf2; --text-dim:#a7b3bc; --text-faint:#72808a;
+      --brand:#3b93d6; --brand-dark:#69b1e3; --brand-light:#12293b; --brand-contrast:#04141f; --logo-blue:#4098db;
+      --gray:#98a0a6; --gray-dark:#c3c9cd;
+      --ok:#5fc788; --ok-bg:#12321f; --ok-border:#245c3a;
+      --warn:#e2ac52; --warn-bg:#3a2a10; --warn-border:#6b4c1a;
+      --crit:#f0847c; --crit-bg:#3a1613; --crit-border:#6e2b25;
+      --oos:#b3a6e0; --oos-bg:#241f3a; --oos-border:#453a6e;
+      --shadow-sm:0 1px 2px rgba(0,0,0,.4); --shadow-md:0 8px 28px rgba(0,0,0,.5); --shadow-modal:0 14px 50px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0c1116; --surface:#141b22; --surface-alt:#101620; --border:#26313b; --border-strong:#374553;
+    --text:#e7edf2; --text-dim:#a7b3bc; --text-faint:#72808a;
+    --brand:#3b93d6; --brand-dark:#69b1e3; --brand-light:#12293b; --brand-contrast:#04141f; --logo-blue:#4098db;
+    --gray:#98a0a6; --gray-dark:#c3c9cd;
+    --ok:#5fc788; --ok-bg:#12321f; --ok-border:#245c3a;
+    --warn:#e2ac52; --warn-bg:#3a2a10; --warn-border:#6b4c1a;
+    --crit:#f0847c; --crit-bg:#3a1613; --crit-border:#6e2b25;
+    --oos:#b3a6e0; --oos-bg:#241f3a; --oos-border:#453a6e;
+  }
+  :root[data-theme="light"]{
+    --bg:#eef1f3; --surface:#ffffff; --surface-alt:#f4f6f8; --border:#dbe0e4; --border-strong:#bcc5cc;
+    --text:#181f26; --text-dim:#4c5560; --text-faint:#818b93;
+    --brand:#005293; --brand-dark:#013f70; --brand-light:#e6eef6; --brand-contrast:#ffffff; --logo-blue:#005293;
+    --gray:#7a7a7a; --gray-dark:#54595f;
+    --ok:#1f7a44; --ok-bg:#e3f3e8; --ok-border:#a8d8ba;
+    --warn:#a3660a; --warn-bg:#faecd7; --warn-border:#e9be82;
+    --crit:#b3261e; --crit-bg:#fbe1df; --crit-border:#e7a8a3;
+    --oos:#5b5580; --oos-bg:#eae7f3; --oos-border:#c2bcd9;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{font-family:var(--font-ui);background:var(--bg);color:var(--text);font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased;}
+  #app{min-height:100vh;}
+  ::selection{background:var(--brand);color:var(--brand-contrast);}
+  button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit;}
+  .mono{font-family:var(--font-mono);font-variant-numeric:tabular-nums;}
+  h1,h2,h3,h4{text-wrap:balance;margin:0;}
+  button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--brand);outline-offset:1px;}
+
+  /* ================= HEADER ================= */
+  .header{
+    display:flex;align-items:center;gap:16px;padding:10px 24px;background:var(--surface);
+    border-bottom:1px solid var(--border);box-shadow:var(--shadow-sm);position:sticky;top:0;z-index:30;
+    flex-wrap:wrap;
+  }
+  .logo-lockup{display:flex;align-items:center;gap:10px;flex:none;}
+  .logo-mark{width:38px;height:38px;flex:none;display:inline-flex;align-items:center;justify-content:center;background:#ffffff;border-radius:6px;overflow:hidden;box-shadow:0 0 0 1px var(--border);}
+  .logo-mark img{width:100%;height:100%;object-fit:contain;display:block;}
+  .logo-text b{display:block;font-size:17px;font-weight:800;letter-spacing:1.5px;color:var(--gray-dark);line-height:1.1;}
+  .logo-text span{display:block;font-size:9.5px;letter-spacing:.6px;color:var(--text-faint);text-transform:uppercase;margin-top:1px;}
+  .header-spacer{flex:1;}
+  .header-right{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+  .site-select-wrap,.lang-select-wrap{display:flex;flex-direction:column;gap:2px;}
+  .site-select-wrap label,.lang-select-wrap label{font-size:9.5px;text-transform:uppercase;letter-spacing:.7px;color:var(--text-faint);font-weight:700;padding-left:1px;}
+  .site-select,.lang-select{
+    border:1.5px solid var(--brand);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);
+    padding:7px 10px;font-weight:600;cursor:pointer;
+  }
+  .site-select{min-width:230px;}
+  .lang-select{min-width:140px;}
+  .reminder-banner{font-size:11px;color:var(--text-faint);padding:10px 18px;background:var(--surface-alt);border-bottom:1px solid var(--border);}
+  @media (max-width:820px){ .header-right{width:100%;justify-content:space-between;} }
+
+  /* ================= SHELL ================= */
+  .shell-body{display:grid;grid-template-columns:212px 1fr;min-height:calc(100vh - 60px);}
+  @media (max-width:880px){ .shell-body{grid-template-columns:1fr;} }
+  .sidebar{background:var(--surface-alt);border-right:1px solid var(--border);padding:16px 10px;position:sticky;top:60px;height:calc(100vh - 60px);overflow-y:auto;}
+  @media (max-width:880px){ .sidebar{position:relative;top:0;height:auto;display:flex;overflow-x:auto;padding:8px 10px;gap:4px;} }
+  .nav{display:flex;flex-direction:column;gap:3px;}
+  @media (max-width:880px){ .nav{flex-direction:row;} }
+  .nav-item{
+    display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:var(--radius-sm);background:transparent;
+    border:1px solid transparent;border-left:3px solid transparent;color:var(--text-dim);cursor:pointer;text-align:left;
+    width:100%;font-size:12.5px;font-weight:600;white-space:nowrap;
+  }
+  .nav-item:hover{background:var(--surface);color:var(--text);}
+  .nav-item.active{background:var(--brand-light);color:var(--brand);border-left-color:var(--brand);}
+  .nav-item .ic{width:16px;height:16px;flex:none;}
+  .main{min-width:0;}
+  .view{padding:20px 24px 60px;max-width:1400px;}
+
+  /* ================= BUTTONS ================= */
+  .btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border-strong);background:var(--surface);color:var(--text);padding:7px 13px;border-radius:var(--radius-sm);cursor:pointer;font-size:12.5px;font-weight:600;white-space:nowrap;}
+  .btn:hover{border-color:var(--brand);color:var(--brand);}
+  .btn-primary{background:var(--brand);border-color:var(--brand);color:var(--brand-contrast);}
+  .btn-primary:hover{background:var(--brand-dark);border-color:var(--brand-dark);color:var(--brand-contrast);}
+  .btn-danger{border-color:var(--crit-border);color:var(--crit);}
+  .btn-danger:hover{background:var(--crit-bg);border-color:var(--crit);}
+  .btn-ghost{border-color:transparent;background:transparent;}
+  .btn-ghost:hover{background:var(--surface-alt);border-color:var(--border);color:var(--text);}
+  .btn-sm{padding:4px 9px;font-size:11.5px;}
+  .icon-btn{border:1px solid var(--border);background:var(--surface);border-radius:var(--radius-sm);width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-dim);}
+  .icon-btn:hover{border-color:var(--brand);color:var(--brand);}
+  .icon-btn.danger:hover{border-color:var(--crit);color:var(--crit);background:var(--crit-bg);}
+  .icon-btn svg{width:13px;height:13px;}
+
+  /* ================= KPI ================= */
+  .kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px;}
+  @media (max-width:1100px){ .kpi-row{grid-template-columns:repeat(2,1fr);} }
+  .kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px 12px;border-top:3px solid var(--k-color,var(--brand));}
+  .kpi .k-label{font-size:10.5px;text-transform:uppercase;letter-spacing:.8px;color:var(--text-faint);font-weight:700;}
+  .kpi .k-value{font-family:var(--font-mono);font-size:29px;font-weight:700;margin-top:6px;line-height:1;color:var(--k-color,var(--text));}
+  .kpi .k-sub{font-size:11px;color:var(--text-faint);margin-top:6px;}
+
+  .compliance-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;margin-bottom:18px;}
+  .compliance-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px;gap:10px;flex-wrap:wrap;}
+  .compliance-head h2{font-size:13.5px;font-weight:700;}
+  .compliance-pct{font-family:var(--font-mono);font-size:22px;font-weight:700;}
+  .compliance-track{height:14px;border-radius:20px;background:var(--surface-alt);border:1px solid var(--border);overflow:hidden;}
+  .compliance-fill{height:100%;border-radius:20px;transition:width .3s ease;}
+  .compliance-legend{display:flex;gap:16px;margin-top:10px;flex-wrap:wrap;}
+  .compliance-legend .li{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-dim);}
+  .compliance-legend .sw{width:9px;height:9px;border-radius:2px;}
+
+  /* ================= PANEL ================= */
+  .panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;}
+  .panel-head{display:flex;align-items:center;gap:10px;padding:13px 16px;border-bottom:1px solid var(--border);flex-wrap:wrap;}
+  .panel-head h2{font-size:13.5px;font-weight:700;}
+  .panel-body{padding:14px 16px;}
+  .panel-body.flush{padding:0;}
+
+  /* ================= TAGS ================= */
+  .tag{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:700;letter-spacing:.4px;padding:3px 8px 3px 6px;border-radius:3px;border:1px solid;text-transform:uppercase;white-space:nowrap;font-family:var(--font-mono);}
+  .tag .dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex:none;}
+  .tag-ok{color:var(--ok);background:var(--ok-bg);border-color:var(--ok-border);}
+  .tag-warn{color:var(--warn);background:var(--warn-bg);border-color:var(--warn-border);}
+  .tag-crit{color:var(--crit);background:var(--crit-bg);border-color:var(--crit-border);}
+  .tag-oos{color:var(--oos);background:var(--oos-bg);border-color:var(--oos-border);}
+  .crit-pill{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;letter-spacing:.3px;}
+  .crit-high{background:var(--crit-bg);color:var(--crit);}
+  .crit-medium{background:var(--warn-bg);color:var(--warn);}
+  .crit-low{background:var(--surface-alt);color:var(--text-dim);border:1px solid var(--border);}
+  .due-soon-flag{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;color:var(--warn);margin-left:6px;}
+
+  /* ================= TOOLBAR / TABLE ================= */
+  .toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid var(--border);}
+  .search-box{position:relative;flex:1;min-width:180px;max-width:280px;}
+  .search-box input{width:100%;padding:7px 10px 7px 28px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--surface-alt);color:var(--text);}
+  .search-box svg{position:absolute;left:8px;top:50%;transform:translateY(-50%);width:13px;height:13px;color:var(--text-faint);}
+  select.filter{min-width:130px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--surface-alt);color:var(--text);padding:7px 9px;}
+  .toolbar-spacer{flex:1;}
+  .table-wrap{overflow-x:auto;}
+  table.data{width:100%;border-collapse:collapse;min-width:1520px;}
+  table.data th{text-align:left;font-size:9.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--text-faint);padding:9px 10px;border-bottom:1px solid var(--border);background:var(--surface-alt);white-space:nowrap;position:sticky;top:0;}
+  table.data th.sortable{cursor:pointer;user-select:none;}
+  table.data th.sortable:hover{color:var(--brand);}
+  table.data th .arrow{margin-left:3px;opacity:.7;font-size:9px;}
+  table.data td{padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:middle;font-size:12px;}
+  table.data tbody tr:hover{background:var(--surface-alt);}
+  table.data tbody tr.row-crit{background:color-mix(in srgb, var(--crit-bg) 55%, transparent);}
+  table.data tbody tr.row-warn{background:color-mix(in srgb, var(--warn-bg) 40%, transparent);}
+  table.data tr.site-row{cursor:pointer;}
+  table.data tr.site-row:hover{background:var(--brand-light);}
+  .cell-tag{font-family:var(--font-mono);font-weight:700;font-size:11.5px;}
+  .cell-name{font-weight:600;}
+  .cell-sub{font-size:10.5px;color:var(--text-faint);}
+  .row-actions{display:flex;gap:5px;justify-content:flex-end;}
+  .empty-state{padding:40px 20px;text-align:center;color:var(--text-faint);font-size:12.5px;}
+
+  /* ================= MODAL / FORM ================= */
+  .overlay{position:fixed;inset:0;background:rgba(6,12,17,.5);display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto;z-index:100;}
+  .modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);width:100%;max-width:680px;box-shadow:var(--shadow-modal);margin-bottom:40px;}
+  .modal.wide{max-width:920px;}
+  .modal-head{display:flex;align-items:center;gap:10px;padding:15px 18px;border-bottom:1px solid var(--border);}
+  .modal-head h3{font-size:14.5px;font-weight:700;}
+  .modal-head .sub{font-size:11.5px;color:var(--text-faint);}
+  .modal-body{padding:18px;max-height:70vh;overflow-y:auto;}
+  .modal-foot{display:flex;justify-content:flex-end;gap:8px;padding:14px 18px;border-top:1px solid var(--border);flex-wrap:wrap;}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 14px;}
+  .form-grid.cols-3{grid-template-columns:1fr 1fr 1fr;}
+  @media (max-width:600px){ .form-grid,.form-grid.cols-3{grid-template-columns:1fr;} }
+  .field{display:flex;flex-direction:column;gap:5px;}
+  .field.span-2{grid-column:span 2;}
+  @media (max-width:600px){ .field.span-2{grid-column:span 1;} }
+  .field label{font-size:10.5px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:.4px;}
+  .field .req{color:var(--crit);}
+  .field .hint{font-size:10.5px;color:var(--text-faint);}
+  .field input,.field select,.field textarea{border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--surface-alt);color:var(--text);padding:7px 9px;width:100%;}
+  .field textarea{resize:vertical;min-height:56px;font-family:inherit;}
+  .form-error{font-size:11px;color:var(--crit);margin-top:8px;padding:8px 10px;background:var(--crit-bg);border:1px solid var(--crit-border);border-radius:var(--radius-sm);}
+  fieldset{border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;margin:0 0 14px;}
+  fieldset legend{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--brand);padding:0 6px;}
+
+  /* ================= DASHBOARD EXTRAS ================= */
+  .grid-2{display:grid;grid-template-columns:1.3fr 1fr;gap:16px;}
+  @media (max-width:1000px){ .grid-2{grid-template-columns:1fr;} }
+  .alert-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);}
+  .alert-row:last-child{border-bottom:none;}
+  .alert-row .a-main{flex:1;min-width:0;}
+  .alert-row .a-tag{font-family:var(--font-mono);font-weight:700;font-size:12px;}
+  .alert-row .a-name{font-size:11px;color:var(--text-faint);}
+  .alert-row .a-days{font-family:var(--font-mono);font-size:11.5px;font-weight:700;}
+  .area-row{display:flex;align-items:center;gap:10px;padding:8px 0;}
+  .area-row .s-label{width:190px;flex:none;font-size:12px;font-weight:600;}
+  .area-track{flex:1;height:8px;background:var(--surface-alt);border:1px solid var(--border);border-radius:20px;overflow:hidden;display:flex;}
+  .area-seg{height:100%;}
+  .area-row .s-count{width:40px;text-align:right;font-family:var(--font-mono);font-size:11.5px;color:var(--text-faint);}
+
+  /* ================= SCHEDULE ================= */
+  .range-tabs{display:flex;gap:6px;}
+  .range-tabs button{border:1px solid var(--border-strong);background:var(--surface);color:var(--text-dim);padding:6px 12px;border-radius:20px;cursor:pointer;font-size:12px;font-weight:600;}
+  .range-tabs button.active{background:var(--brand);border-color:var(--brand);color:var(--brand-contrast);}
+  .task-row{display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid var(--border);}
+  .task-row:last-child{border-bottom:none;}
+  .task-row .t-date{width:82px;flex:none;font-family:var(--font-mono);font-size:11.5px;color:var(--text-dim);}
+  .task-row .t-main{flex:1;min-width:0;}
+  .task-row .t-tag{font-family:var(--font-mono);font-weight:700;font-size:12.5px;}
+  .task-row .t-name{font-size:11px;color:var(--text-faint);}
+
+  .cal-nav-btn{border:1px solid var(--border);background:var(--surface);border-radius:var(--radius-sm);width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-dim);}
+  .cal-nav-btn:hover{border-color:var(--brand);color:var(--brand);}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;}
+  .cal-dow{background:var(--surface-alt);padding:6px 0;text-align:center;font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--text-faint);font-weight:700;}
+  .cal-cell{background:var(--surface);min-height:58px;padding:5px 6px;position:relative;}
+  .cal-cell.out{background:var(--surface-alt);}
+  .cal-cell.today{box-shadow:inset 0 0 0 2px var(--brand);}
+  .cal-cell.has-events{cursor:pointer;}
+  .cal-cell.selected{background:var(--brand-light);}
+  .cal-cell .d-num{font-family:var(--font-mono);font-size:11px;color:var(--text-faint);}
+  .cal-cell.today .d-num{color:var(--brand);font-weight:700;}
+  .cal-dots{display:flex;gap:3px;flex-wrap:wrap;margin-top:5px;}
+  .cal-dot{width:6px;height:6px;border-radius:50%;}
+  .cal-legend{display:flex;gap:14px;padding-top:10px;flex-wrap:wrap;}
+
+  /* ================= CERTIFICATE ================= */
+  .certificate-container{background:var(--surface);border:1px solid var(--border-strong);border-radius:var(--radius);padding:34px 38px;max-width:900px;margin:0 auto;}
+  .cert-top{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px double var(--border-strong);padding-bottom:16px;margin-bottom:18px;}
+  .cert-brand{display:flex;gap:12px;align-items:center;}
+  .cert-brand .logo-mark{width:40px;height:40px;}
+  .cert-brand h2{font-size:15px;font-weight:800;letter-spacing:.5px;color:var(--gray-dark);}
+  .cert-brand .site-line{font-size:11px;color:var(--text-faint);}
+  .cert-id-box{text-align:right;font-family:var(--font-mono);font-size:11px;color:var(--text-dim);}
+  .cert-id-box b{font-size:13px;color:var(--text);}
+  .cert-title{text-align:center;margin:6px 0 22px;}
+  .cert-title h1{font-size:18px;letter-spacing:1.5px;text-transform:uppercase;color:var(--brand);}
+  .cert-title .subt{font-size:11px;color:var(--text-faint);letter-spacing:.5px;margin-top:3px;}
+  .cert-section{margin-bottom:18px;}
+  .cert-section h4{font-size:10.5px;text-transform:uppercase;letter-spacing:1px;color:var(--brand);margin:0 0 8px;border-bottom:1px solid var(--border);padding-bottom:5px;}
+  .cert-kv{display:grid;grid-template-columns:1fr 1fr;gap:6px 24px;}
+  .cert-kv .row{display:flex;justify-content:space-between;gap:10px;font-size:12px;border-bottom:1px dotted var(--border);padding:3px 0;}
+  .cert-kv .row .k{color:var(--text-faint);}
+  .cert-kv .row .v{font-family:var(--font-mono);font-weight:600;text-align:right;}
+  table.cert-table{width:100%;border-collapse:collapse;font-size:12px;}
+  table.cert-table th{background:var(--surface-alt);text-align:left;padding:7px 10px;border:1px solid var(--border);font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--text-faint);}
+  table.cert-table td{padding:8px 10px;border:1px solid var(--border);font-family:var(--font-mono);}
+  .cert-verdict{display:inline-flex;align-items:center;gap:6px;font-weight:700;padding:4px 10px;border-radius:3px;border:1px solid;font-family:var(--font-mono);text-transform:uppercase;font-size:11px;}
+  .cert-sign-row{display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-top:26px;}
+  .sign-box{border-top:1px solid var(--border-strong);padding-top:8px;}
+  .sign-name{font-family:"Brush Script MT",cursive;font-size:25px;color:var(--brand-dark);margin-bottom:2px;}
+  .sign-role{font-size:11.5px;font-weight:700;}
+  .sign-meta{font-size:10.5px;color:var(--text-faint);font-family:var(--font-mono);}
+  .cert-foot{margin-top:22px;padding-top:12px;border-top:1px solid var(--border);font-size:9.5px;color:var(--text-faint);display:flex;justify-content:space-between;gap:12px;}
+  .cert-actions{max-width:900px;margin:0 auto 16px;display:flex;justify-content:space-between;align-items:center;}
+
+  @media print{
+    body *{visibility:hidden;}
+    .certificate-container,.certificate-container *{visibility:visible;}
+    .certificate-container{position:absolute;top:0;left:0;width:100%;max-width:none;border:none;padding:0 20px;}
+    .no-print{display:none !important;}
+  }
+</style>
+
+<div id="app"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+(function(){
+  "use strict";
+
+  /* =====================================================================
+     SUPABASE CLIENT
+  ===================================================================== */
+  var SUPABASE_URL = "https://ruujpkoqcofiejhvrywu.supabase.co";
+  var SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ1dWpwa29xY29maWVqaHZyeXd1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4MzAwMTUsImV4cCI6MjA5OTQwNjAxNX0.2qWaDYstq8w6BPxJqLDyZNv2kccXRqMA4PE5bYxaJ1M";
+  var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  /* =====================================================================
+     I18N — English / Spanish / Chinese (Mandarin)
+  ===================================================================== */
+  var STR = {
+    en:{
+      appTitle:"Global Equipment Calibration System",
+      manufacturingSite:"Manufacturing Site",
+      language:"Language",
+      navDashboard:"Executive Dashboard", navEquipment:"Master Equipment List", navEvents:"Event Registration",
+      navSchedule:"Preventive Schedule", navGlobal:"All Sites Overview",
+      kpiTotal:"Total Equipment", kpiApproved:"Approved (Calibrated)", kpiDueSoon:"Due Soon (< 30 Days)",
+      kpiOverdue:"Overdue — Critical", kpiOOS:"Out of Service",
+      complianceTitle:"Calibration Compliance —",
+      criticalAlerts:"Critical Alerts",
+      noCriticalAlerts:"No critical alerts. All monitored equipment is within tolerance at this site.",
+      logEvent:"Log Event", statusByArea:"Status by Plant Area",
+      noEquipmentAtSite:"No equipment registered at this site.",
+      daysOverdueSuffix:"days overdue", dueTodayLabel:"Due today", daysSuffix:"days",
+      searchPh:"Search ID, tag, name, serial…",
+      filterAllStatus:"All Status", filterAllCriticality:"All Criticality", filterAllAreas:"All Plant Areas",
+      addEquipmentBtn:"+ Add New Equipment",
+      colEquipmentId:"Equipment ID", colEquipmentTag:"Equipment / Asset Tag", colPlantArea:"Plant Area",
+      colManufacturer:"Brand", colModel:"Model", colSerial:"Serial No.", colUnit:"Unit",
+      colRange:"Operating Range", colTolerance:"Tolerance (EMP)", colCriticality:"Criticality", colFreq:"Freq.",
+      colLastCal:"Last Cal.", colNextCal:"Next Cal.", colStatus:"Status", colResponsible:"Responsible Technician",
+      colActions:"Actions",
+      noEquipmentMatches:"No equipment matches the current filters for",
+      editEquipmentTitle:"Edit Equipment", addEquipmentTitle:"Add New Equipment", assetMasterDataSub:"Asset master data —",
+      f_equipmentId:"Equipment ID / Inventory Code", f_assetTag:"Asset Tag", f_equipmentName:"Equipment Name",
+      f_manufacturer:"Brand", f_model:"Model", f_serial:"Serial Number", f_manufacturingSite:"Manufacturing Site",
+      f_unit:"Unit of Measure", f_rangeMin:"Operating Range — Min", f_rangeMax:"Operating Range — Max",
+      f_tolerance:"Tolerance / Max. Permissible Error", f_area:"Physical Location / Plant Area",
+      f_criticality:"Process Criticality", f_frequency:"Calibration Frequency (months)", f_lastCal:"Last Calibration Date",
+      f_status:"Equipment Status", fieldsetResp:"Calibration Responsibility & Reminders",
+      f_respName:"Responsible Technician", f_respEmail:"Technician Email",
+      respHint:"This person receives an automatic email reminder when the next calibration is 30 days away.",
+      hintRange:"The instrument's calibrated working range — not necessarily its full physical range.",
+      hintTolerance:"The maximum deviation allowed before the equipment is considered out of tolerance, per the manufacturer or the applicable standard.",
+      hintCriticality:"How much a failure of this equipment would affect production or product quality. High blocks the process if it fails; Low has minimal impact.",
+      hintFrequency:"How often this equipment must be recalibrated, in months, per your internal QMS schedule or the manufacturer's recommendation.",
+      hintStatus:"Approved: cleared for use. Conditional: usable with restrictions noted by QA. Out of Service: not to be used until recalibrated or repaired.",
+      hintCalType:"Internal: performed by your own metrology team. External: performed by an accredited outside laboratory.",
+      hintTraceCert:"The certificate number of the reference standard used for this calibration — this is what proves the result is traceable to a national or international standard.",
+      hintErrorFound:"The actual deviation measured during this test — compare it against the Tolerance / EMP above to judge the result.",
+      hintUncertainty:"Optional — leave blank if you don't have this value. If External, copy it from the lab's certificate. If Internal, use your site's validated uncertainty budget for this instrument type, if one exists. k=2 means ≈95% confidence.",
+      cancel:"Cancel", saveChanges:"Save Changes", addEquipmentSubmit:"Add Equipment",
+      errRequired:"Please complete all required fields before saving.",
+      errDuplicateId:"An equipment with this Equipment ID already exists. Please use a unique inventory code.",
+      errInvalidEmail:"Please enter a valid email address for the responsible technician.",
+      titleRegisterEvent:"Register Calibration Event", titleEditEquipment:"Edit Equipment", titleDeleteEquipment:"Delete Equipment",
+      registerEventTitle:"Register Calibration Event", selectEquipmentSub:"Select equipment to calibrate",
+      fieldEquipment:"Equipment", f_testDate:"Test Date", f_calibrationType:"Calibration Performed",
+      typeInternal:"Internal", typeExternal:"External",
+      f_provider:"External Laboratory",
+      providerPh:"e.g. Bureau Veritas, Indecopi, SGS…",
+      f_traceCert:"Traceability Certificate No. (Reference Standard)", traceCertPh:"e.g. BV-PE-22190",
+      f_errorFound:"Max. Error Found", errorFoundPh:"e.g. ± 0.015 mm", f_uncertainty:"Expanded Uncertainty (k=2)",
+      f_verdict:"Final Verdict", verdictPass:"PASS — Approved for Use", verdictFail:"FAIL — Out of Service",
+      verdictPassShort:"PASS", verdictFailShort:"FAIL",
+      f_performedBy:"Performed By",
+      performedByHint:"The person who physically carried out this calibration test — may differ from the equipment's assigned Responsible Technician.",
+      f_qaApprover:"QA Approver",
+      qaApproverPh:"Name of the QA Approver signing off on this event",
+      saveGenerateCert:"Save & Generate Certificate", eventLogTitle:"Calibration Event Log —",
+      registerNewEvent:"+ Register New Event",
+      eventsPermanentNote:"Calibration events are permanent once saved — there is no delete or edit action for them, so a completed record can never be removed accidentally or intentionally.",
+      noEventsYet:"No calibration events recorded yet for", viewCertificate:"View Certificate",
+      overdueImmediate:"Overdue — Immediate Action Required", upcomingCalibrations:"Upcoming Preventive Calibrations —",
+      daysTab:"Days", filteredTo:"Filtered to", clear:"Clear",
+      nothingOverdue:"Nothing overdue at this site.", nothingDueWindow:"Nothing due within this window.",
+      calibrationCalendar:"Calibration Calendar —", dueSoonLegend:"Due Soon (≤ 30 days)", overdueLegend:"Overdue",
+      kpiNetworkTotal:"Network Equipment", kpiApprovedNetwork:"Approved Network-Wide",
+      siteCompliance:"Site-by-Site Compliance — Global Network", clickRowToSwitch:"Click a row to switch the active site",
+      colSite:"Site", colTotal:"Total", colDueSoon:"Due Soon", colCompliance:"Compliance", selectedTag:"(selected)",
+      networkAlerts:"Network-Wide Overdue Alerts", noOverdueNetwork:"No overdue equipment across the entire Bradken network.",
+      goToSite:"Go to Site",
+      certNo:"Certificate No.", issueDate:"Issue Date", certTitle:"Internal Calibration Certificate",
+      certSubtitle:"Issued under the Bradken Site Quality Management System",
+      certSiteLine:"Site — Quality Assurance / Metrology",
+      sectEquipment:"Equipment Under Test", kTag:"Tag", kName:"Name", kBrandModel:"Brand / Model",
+      kSerial:"Serial No.", kSiteArea:"Site / Area", kFrequency:"Frequency", kFrequencyUnit:"months",
+      sectResults:"Calibration Results", parameter:"Parameter", value:"Value",
+      toleranceRow:"Tolerance / Max. Permissible Error", errorFoundRow:"Max. Error Found",
+      uncertaintyRow:"Expanded Uncertainty (k=2)", verdictRow:"Final Verdict",
+      sectTraceability:"Metrological Traceability", providerRow:"Calibration Provider / External Lab",
+      traceCertRow:"Reference Standard Traceability Cert. No.",
+      sectApproval:"Approval", calibratedByRole:"Calibrated By — Technician",
+      approvedByRole:"Approved By — QA Approver, Bradken", digitallySigned:"Digitally Signed (simulated)",
+      certFoot1:"This certificate is generated for internal QMS demonstration purposes within the Bradken Global Equipment Calibration System.",
+      certFoot2:"Validity is conditioned to the equipment remaining within its assigned operating environment.",
+      printSavePdf:"Print / Save as PDF", back:"← Back",
+      deleteEquipmentTitle:"Delete Equipment",
+      deletePermanentAsset:"This will permanently remove this asset", andHistory:" and its calibration history",
+      fromSession:"from the session. This action cannot be undone.",
+      historyWarnPrefix:"This equipment has", historyWarnRecordSing:"calibration record", historyWarnRecordPl:"calibration records",
+      historyWarnOnFileSing:"on file, including an issued certificate.", historyWarnOnFilePl:"on file, including issued certificates.",
+      historyWarnSuffix:"Deleting it will permanently erase that compliance history — this cannot be undone.",
+      typeIdConfirm:"Type the Equipment ID to confirm", deleteBtn:"Delete",
+      toastEquipmentSaved:"Equipment saved.", toastEquipmentDeleted:"Equipment deleted.",
+      statusApproved:"Approved", statusConditional:"Conditional", statusOverdue:"Overdue", statusOOS:"Out of Service",
+      critHigh:"High — Blocking", critMedium:"Medium", critLow:"Low",
+      regionSAM:"South America", regionNAM:"North America", regionAustralia:"Australia", regionAsia:"Asia",
+      dateLocale:"en-US", dows:["S","M","T","W","T","F","S"],
+      authAppTitle:"Global Equipment Calibration System", authSignInTitle:"Sign In", authSignUpTitle:"Create Account",
+      authFullName:"Full Name", authEmail:"Email", authPassword:"Password",
+      authSignInBtn:"Sign In", authSignUpBtn:"Create Account",
+      authToggleToSignup:"Don't have an account? Sign up", authToggleToLogin:"Already have an account? Sign in",
+      authCheckEmail:"Account created. Please check your email to confirm your address before signing in.",
+      authLoadingApp:"Loading your data…", authSignOut:"Sign Out",
+      roleAdmin:"Administrator", roleMember:"Member",
+      loadErrorPrefix:"Could not load data:", retry:"Retry"
+    },
+    es:{
+      appTitle:"Sistema Global de Gestión de Calibración de Equipos",
+      manufacturingSite:"Site de Manufactura",
+      language:"Idioma",
+      navDashboard:"Panel Ejecutivo", navEquipment:"Listado Maestro de Equipos", navEvents:"Registro de Eventos",
+      navSchedule:"Cronograma Preventivo", navGlobal:"Vista de Todos los Sites",
+      kpiTotal:"Total de Equipos", kpiApproved:"Aprobados (Calibrados)", kpiDueSoon:"Por Vencer (< 30 Días)",
+      kpiOverdue:"Vencidos — Crítico", kpiOOS:"Fuera de Servicio",
+      complianceTitle:"Cumplimiento de Calibración —",
+      criticalAlerts:"Alertas Críticas",
+      noCriticalAlerts:"Sin alertas críticas. Todos los equipos monitoreados están dentro de tolerancia en este site.",
+      logEvent:"Registrar Evento", statusByArea:"Estado por Área de Planta",
+      noEquipmentAtSite:"No hay equipos registrados en este site.",
+      daysOverdueSuffix:"días de atraso", dueTodayLabel:"Vence hoy", daysSuffix:"días",
+      searchPh:"Buscar ID, tag, nombre, serie…",
+      filterAllStatus:"Todo Estado", filterAllCriticality:"Toda Criticidad", filterAllAreas:"Todas las Áreas de Planta",
+      addEquipmentBtn:"+ Agregar Nuevo Equipo",
+      colEquipmentId:"ID de Equipo", colEquipmentTag:"Equipo / Tag de Activo", colPlantArea:"Área de Planta",
+      colManufacturer:"Marca", colModel:"Modelo", colSerial:"N° de Serie", colUnit:"Unidad",
+      colRange:"Rango de Operación", colTolerance:"Tolerancia (EMP)", colCriticality:"Criticidad", colFreq:"Frec.",
+      colLastCal:"Últ. Calib.", colNextCal:"Próx. Calib.", colStatus:"Estado", colResponsible:"Técnico Responsable",
+      colActions:"Acciones",
+      noEquipmentMatches:"Ningún equipo coincide con los filtros actuales para",
+      editEquipmentTitle:"Editar Equipo", addEquipmentTitle:"Agregar Nuevo Equipo", assetMasterDataSub:"Datos maestros del activo —",
+      f_equipmentId:"ID de Equipo / Código de Inventario", f_assetTag:"Tag del Activo", f_equipmentName:"Nombre del Equipo",
+      f_manufacturer:"Marca", f_model:"Modelo", f_serial:"Número de Serie", f_manufacturingSite:"Site de Manufactura",
+      f_unit:"Unidad de Medida", f_rangeMin:"Rango de Operación — Mín", f_rangeMax:"Rango de Operación — Máx",
+      f_tolerance:"Tolerancia / Error Máximo Permitido", f_area:"Ubicación Física / Área de Planta",
+      f_criticality:"Criticidad del Proceso", f_frequency:"Frecuencia de Calibración (meses)", f_lastCal:"Fecha de Última Calibración",
+      f_status:"Estado del Equipo", fieldsetResp:"Responsabilidad de Calibración y Recordatorios",
+      f_respName:"Técnico Responsable", f_respEmail:"Email del Técnico",
+      respHint:"Esta persona recibe un recordatorio automático por correo cuando falten 30 días para la próxima calibración.",
+      hintRange:"El rango de trabajo calibrado del instrumento, no necesariamente su rango físico completo.",
+      hintTolerance:"La desviación máxima permitida antes de que el equipo se considere fuera de tolerancia, según el fabricante o la norma aplicable.",
+      hintCriticality:"Qué tanto afectaría a la producción o a la calidad del producto si este equipo falla. Alta detiene el proceso si falla; Baja tiene impacto mínimo.",
+      hintFrequency:"Cada cuántos meses debe recalibrarse este equipo, según el cronograma interno del SGC o la recomendación del fabricante.",
+      hintStatus:"Aprobado: apto para uso. Condicionado: usable con restricciones indicadas por Calidad. Fuera de Servicio: no debe usarse hasta ser recalibrado o reparado.",
+      hintCalType:"Interna: realizada por su propio equipo de metrología. Externa: realizada por un laboratorio externo acreditado.",
+      hintTraceCert:"El número de certificado del patrón de referencia usado en esta calibración — esto es lo que demuestra que el resultado es trazable a un patrón nacional o internacional.",
+      hintErrorFound:"La desviación real medida durante este ensayo — compárela con la Tolerancia / EMP de arriba para juzgar el resultado.",
+      hintUncertainty:"Opcional — déjelo en blanco si no cuenta con este valor. Si es Externa, cópielo del certificado del laboratorio. Si es Interna, use el presupuesto de incertidumbre ya validado de su site para este tipo de instrumento, si existe. k=2 significa ≈95% de confianza.",
+      cancel:"Cancelar", saveChanges:"Guardar Cambios", addEquipmentSubmit:"Agregar Equipo",
+      errRequired:"Por favor complete todos los campos obligatorios antes de guardar.",
+      errDuplicateId:"Ya existe un equipo con este ID. Por favor use un código de inventario único.",
+      errInvalidEmail:"Por favor ingrese un correo electrónico válido para el técnico responsable.",
+      titleRegisterEvent:"Registrar Evento de Calibración", titleEditEquipment:"Editar Equipo", titleDeleteEquipment:"Eliminar Equipo",
+      registerEventTitle:"Registrar Evento de Calibración", selectEquipmentSub:"Seleccione el equipo a calibrar",
+      fieldEquipment:"Equipo", f_testDate:"Fecha del Ensayo", f_calibrationType:"Calibración Realizada",
+      typeInternal:"Interna", typeExternal:"Externa",
+      f_provider:"Laboratorio Externo",
+      providerPh:"ej. Bureau Veritas, Indecopi, SGS…",
+      f_traceCert:"N° de Certificado de Trazabilidad (Patrón de Referencia)", traceCertPh:"ej. BV-PE-22190",
+      f_errorFound:"Error Máximo Encontrado", errorFoundPh:"ej. ± 0.015 mm", f_uncertainty:"Incertidumbre Expandida (k=2)",
+      f_verdict:"Dictamen Final", verdictPass:"APTO — Aprobado para Uso", verdictFail:"NO APTO — Fuera de Servicio",
+      verdictPassShort:"APTO", verdictFailShort:"NO APTO",
+      f_performedBy:"Ejecutado Por",
+      performedByHint:"La persona que ejecutó físicamente este ensayo de calibración — puede ser distinta al Técnico Responsable asignado al equipo.",
+      f_qaApprover:"QA Responsable",
+      qaApproverPh:"Nombre del QA Responsable que aprueba este evento",
+      saveGenerateCert:"Guardar y Generar Certificado", eventLogTitle:"Registro de Eventos de Calibración —",
+      registerNewEvent:"+ Registrar Nuevo Evento",
+      eventsPermanentNote:"Los eventos de calibración son permanentes una vez guardados — no existe acción de eliminar o editar, por lo que un registro completado nunca puede eliminarse accidental o intencionalmente.",
+      noEventsYet:"Aún no hay eventos de calibración registrados para", viewCertificate:"Ver Certificado",
+      overdueImmediate:"Vencidos — Acción Inmediata Requerida", upcomingCalibrations:"Próximas Calibraciones Preventivas —",
+      daysTab:"Días", filteredTo:"Filtrado a", clear:"Limpiar",
+      nothingOverdue:"Nada vencido en este site.", nothingDueWindow:"Nada por vencer en esta ventana.",
+      calibrationCalendar:"Calendario de Calibración —", dueSoonLegend:"Por Vencer (≤ 30 días)", overdueLegend:"Vencido",
+      kpiNetworkTotal:"Equipos en la Red", kpiApprovedNetwork:"Aprobados en Toda la Red",
+      siteCompliance:"Cumplimiento por Site — Red Global", clickRowToSwitch:"Haga clic en una fila para cambiar el site activo",
+      colSite:"Site", colTotal:"Total", colDueSoon:"Por Vencer", colCompliance:"Cumplimiento", selectedTag:"(seleccionado)",
+      networkAlerts:"Alertas de Vencidos en Toda la Red", noOverdueNetwork:"No hay equipos vencidos en toda la red de Bradken.",
+      goToSite:"Ir al Site",
+      certNo:"N° de Certificado", issueDate:"Fecha de Emisión", certTitle:"Certificado Interno de Calibración",
+      certSubtitle:"Emitido bajo el Sistema de Gestión de Calidad del Site Bradken",
+      certSiteLine:"Site — Aseguramiento de Calidad / Metrología",
+      sectEquipment:"Equipo Bajo Prueba", kTag:"Tag", kName:"Nombre", kBrandModel:"Marca / Modelo",
+      kSerial:"N° de Serie", kSiteArea:"Site / Área", kFrequency:"Frecuencia", kFrequencyUnit:"meses",
+      sectResults:"Resultados de Calibración", parameter:"Parámetro", value:"Valor",
+      toleranceRow:"Tolerancia / Error Máximo Permitido", errorFoundRow:"Error Máximo Encontrado",
+      uncertaintyRow:"Incertidumbre Expandida (k=2)", verdictRow:"Dictamen Final",
+      sectTraceability:"Trazabilidad Metrológica", providerRow:"Proveedor de Calibración / Laboratorio Externo",
+      traceCertRow:"N° de Cert. de Trazabilidad del Patrón",
+      sectApproval:"Aprobación", calibratedByRole:"Calibrado Por — Técnico",
+      approvedByRole:"Aprobado Por — QA Responsable, Bradken", digitallySigned:"Firmado Digitalmente (simulado)",
+      certFoot1:"Este certificado se genera con fines de demostración interna del SGC dentro del Bradken Global Equipment Calibration System.",
+      certFoot2:"La validez está condicionada a que el equipo permanezca en su entorno operativo asignado.",
+      printSavePdf:"Imprimir / Guardar como PDF", back:"← Volver",
+      deleteEquipmentTitle:"Eliminar Equipo",
+      deletePermanentAsset:"Esto eliminará permanentemente este activo", andHistory:" y su historial de calibración",
+      fromSession:"de la sesión. Esta acción no se puede deshacer.",
+      historyWarnPrefix:"Este equipo tiene", historyWarnRecordSing:"registro de calibración", historyWarnRecordPl:"registros de calibración",
+      historyWarnOnFileSing:"registrado, incluyendo un certificado emitido.", historyWarnOnFilePl:"registrados, incluyendo certificados emitidos.",
+      historyWarnSuffix:"Eliminarlo borrará permanentemente ese historial de cumplimiento — esto no se puede deshacer.",
+      typeIdConfirm:"Escriba el ID del Equipo para confirmar", deleteBtn:"Eliminar",
+      toastEquipmentSaved:"Equipo guardado.", toastEquipmentDeleted:"Equipo eliminado.",
+      statusApproved:"Aprobado", statusConditional:"Condicionado", statusOverdue:"Vencido", statusOOS:"Fuera de Servicio",
+      critHigh:"Alta — Bloqueante", critMedium:"Media", critLow:"Baja",
+      regionSAM:"Sudamérica", regionNAM:"Norteamérica", regionAustralia:"Australia", regionAsia:"Asia",
+      dateLocale:"es-PE", dows:["D","L","M","M","J","V","S"],
+      authAppTitle:"Sistema Global de Gestión de Calibración de Equipos", authSignInTitle:"Iniciar Sesión", authSignUpTitle:"Crear Cuenta",
+      authFullName:"Nombre Completo", authEmail:"Correo Electrónico", authPassword:"Contraseña",
+      authSignInBtn:"Iniciar Sesión", authSignUpBtn:"Crear Cuenta",
+      authToggleToSignup:"¿No tienes cuenta? Regístrate", authToggleToLogin:"¿Ya tienes cuenta? Inicia sesión",
+      authCheckEmail:"Cuenta creada. Por favor revisa tu correo para confirmar tu dirección antes de iniciar sesión.",
+      authLoadingApp:"Cargando tus datos…", authSignOut:"Cerrar Sesión",
+      roleAdmin:"Administrador", roleMember:"Miembro",
+      loadErrorPrefix:"No se pudieron cargar los datos:", retry:"Reintentar"
+    },
+    zh:{
+      appTitle:"全球设备校准管理系统",
+      manufacturingSite:"制造基地",
+      language:"语言",
+      navDashboard:"高管仪表盘", navEquipment:"设备总台账", navEvents:"事件登记",
+      navSchedule:"预防性计划", navGlobal:"全站点总览",
+      kpiTotal:"设备总数", kpiApproved:"已批准（已校准）", kpiDueSoon:"即将到期（<30天）",
+      kpiOverdue:"逾期 — 严重", kpiOOS:"停用",
+      complianceTitle:"校准合规率 —",
+      criticalAlerts:"严重警报",
+      noCriticalAlerts:"无严重警报。该场地所有受监控设备均在公差范围内。",
+      logEvent:"记录事件", statusByArea:"按厂区状态",
+      noEquipmentAtSite:"该场地未登记任何设备。",
+      daysOverdueSuffix:"天逾期", dueTodayLabel:"今日到期", daysSuffix:"天",
+      searchPh:"搜索编号、标签、名称、序列号…",
+      filterAllStatus:"所有状态", filterAllCriticality:"所有关键度", filterAllAreas:"所有厂区",
+      addEquipmentBtn:"+ 新增设备",
+      colEquipmentId:"设备编号", colEquipmentTag:"设备 / 资产标签", colPlantArea:"厂区",
+      colManufacturer:"品牌", colModel:"型号", colSerial:"序列号", colUnit:"单位",
+      colRange:"工作范围", colTolerance:"公差（最大允许误差）", colCriticality:"关键度", colFreq:"频率",
+      colLastCal:"上次校准", colNextCal:"下次校准", colStatus:"状态", colResponsible:"负责技术员",
+      colActions:"操作",
+      noEquipmentMatches:"没有设备符合当前的筛选条件，场地：",
+      editEquipmentTitle:"编辑设备", addEquipmentTitle:"新增设备", assetMasterDataSub:"资产主数据 —",
+      f_equipmentId:"设备编号 / 库存代码", f_assetTag:"资产标签", f_equipmentName:"设备名称",
+      f_manufacturer:"品牌", f_model:"型号", f_serial:"序列号", f_manufacturingSite:"制造基地",
+      f_unit:"计量单位", f_rangeMin:"工作范围 — 最小值", f_rangeMax:"工作范围 — 最大值",
+      f_tolerance:"公差 / 最大允许误差", f_area:"物理位置 / 厂区",
+      f_criticality:"工艺关键度", f_frequency:"校准频率（月）", f_lastCal:"上次校准日期",
+      f_status:"设备状态", fieldsetResp:"校准责任与提醒",
+      f_respName:"负责技术员", f_respEmail:"技术员邮箱",
+      respHint:"该负责人将在下次校准还剩30天时收到自动邮件提醒。",
+      hintRange:"仪器已校准的工作范围——不一定是其完整的物理量程。",
+      hintTolerance:"设备被视为超出公差之前允许的最大偏差，依据制造商或适用标准确定。",
+      hintCriticality:"该设备发生故障时对生产或产品质量的影响程度。高——故障将阻断工艺流程；低——影响很小。",
+      hintFrequency:"该设备必须重新校准的间隔月数，依据内部质量管理体系计划或制造商建议确定。",
+      hintStatus:"已批准：可以使用。有条件：可在质量部门标注的限制条件下使用。停用：在重新校准或维修之前不得使用。",
+      hintCalType:"内部：由本单位计量团队执行。外部：由具备资质的外部实验室执行。",
+      hintTraceCert:"本次校准所用参考标准器的证书编号——用以证明结果可溯源至国家或国际标准。",
+      hintErrorFound:"本次检测中实际测得的偏差——请与上方的公差/最大允许误差对比以判断结果。",
+      hintUncertainty:"可选项——如没有该数值可留空。若为外部校准，请从实验室证书中抄录该数值；若为内部校准，如已有针对该类仪器验证过的不确定度预算，可使用该数值。k=2表示约95%置信水平。",
+      cancel:"取消", saveChanges:"保存更改", addEquipmentSubmit:"新增设备",
+      errRequired:"保存前请填写所有必填字段。",
+      errDuplicateId:"该设备编号已存在，请使用唯一的库存代码。",
+      errInvalidEmail:"请输入负责技术员的有效电子邮箱。",
+      titleRegisterEvent:"登记校准事件", titleEditEquipment:"编辑设备", titleDeleteEquipment:"删除设备",
+      registerEventTitle:"登记校准事件", selectEquipmentSub:"选择要校准的设备",
+      fieldEquipment:"设备", f_testDate:"检测日期", f_calibrationType:"校准执行方式",
+      typeInternal:"内部", typeExternal:"外部",
+      f_provider:"外部实验室",
+      providerPh:"例如：必维国际检验集团、Indecopi、SGS…",
+      f_traceCert:"溯源证书编号（参考标准器）", traceCertPh:"例如 BV-PE-22190",
+      f_errorFound:"最大发现误差", errorFoundPh:"例如 ± 0.015 mm", f_uncertainty:"扩展不确定度 (k=2)",
+      f_verdict:"最终判定", verdictPass:"合格 — 批准使用", verdictFail:"不合格 — 停用",
+      verdictPassShort:"合格", verdictFailShort:"不合格",
+      f_performedBy:"执行人",
+      performedByHint:"实际执行本次校准检测的人员——可能与设备指定的负责技术员不同。",
+      f_qaApprover:"质量审批人",
+      qaApproverPh:"批准此事件的质量审批人姓名",
+      saveGenerateCert:"保存并生成证书", eventLogTitle:"校准事件日志 —",
+      registerNewEvent:"+ 登记新事件",
+      eventsPermanentNote:"校准事件一旦保存即为永久记录 — 没有删除或编辑功能，因此已完成的记录无法被意外或故意删除。",
+      noEventsYet:"尚无校准事件记录，场地：", viewCertificate:"查看证书",
+      overdueImmediate:"逾期 — 需立即处理", upcomingCalibrations:"即将进行的预防性校准 —",
+      daysTab:"天", filteredTo:"已筛选至", clear:"清除",
+      nothingOverdue:"该场地暂无逾期项目。", nothingDueWindow:"该时间窗口内暂无到期项目。",
+      calibrationCalendar:"校准日历 —", dueSoonLegend:"即将到期（≤30天）", overdueLegend:"逾期",
+      kpiNetworkTotal:"全网设备总数", kpiApprovedNetwork:"全网已批准",
+      siteCompliance:"各站点合规率 — 全球网络", clickRowToSwitch:"点击某行可切换当前活动场地",
+      colSite:"场地", colTotal:"总数", colDueSoon:"即将到期", colCompliance:"合规率", selectedTag:"（当前）",
+      networkAlerts:"全网逾期警报", noOverdueNetwork:"必威全网范围内无逾期设备。",
+      goToSite:"前往该场地",
+      certNo:"证书编号", issueDate:"签发日期", certTitle:"内部校准证书",
+      certSubtitle:"根据必威站点质量管理体系签发",
+      certSiteLine:"场地 — 质量保证 / 计量部门",
+      sectEquipment:"受测设备", kTag:"标签", kName:"名称", kBrandModel:"品牌 / 型号",
+      kSerial:"序列号", kSiteArea:"场地 / 厂区", kFrequency:"频率", kFrequencyUnit:"个月",
+      sectResults:"校准结果", parameter:"参数", value:"数值",
+      toleranceRow:"公差 / 最大允许误差", errorFoundRow:"最大发现误差",
+      uncertaintyRow:"扩展不确定度 (k=2)", verdictRow:"最终判定",
+      sectTraceability:"计量溯源性", providerRow:"校准服务商 / 外部实验室",
+      traceCertRow:"参考标准器溯源证书编号",
+      sectApproval:"批准", calibratedByRole:"校准人 — 技术员",
+      approvedByRole:"批准人 — 必威质量审批人", digitallySigned:"电子签名（模拟）",
+      certFoot1:"本证书仅用于必威全球设备校准管理系统内部质量管理体系演示目的。",
+      certFoot2:"本证书的有效性以设备保持在其指定运行环境内为前提。",
+      printSavePdf:"打印 / 另存为PDF", back:"← 返回",
+      deleteEquipmentTitle:"删除设备",
+      deletePermanentAsset:"此操作将永久删除该资产", andHistory:"及其校准历史",
+      fromSession:"（本次会话）。此操作无法撤销。",
+      historyWarnPrefix:"该设备有", historyWarnRecordSing:"条校准记录", historyWarnRecordPl:"条校准记录",
+      historyWarnOnFileSing:"在案，包含已签发的证书。", historyWarnOnFilePl:"在案，包含已签发的证书。",
+      historyWarnSuffix:"删除后将永久清除该合规历史 — 此操作无法撤销。",
+      typeIdConfirm:"请输入设备编号以确认", deleteBtn:"删除",
+      toastEquipmentSaved:"设备已保存。", toastEquipmentDeleted:"设备已删除。",
+      statusApproved:"已批准", statusConditional:"有条件", statusOverdue:"逾期", statusOOS:"停用",
+      critHigh:"高 — 阻断性", critMedium:"中", critLow:"低",
+      regionSAM:"南美洲", regionNAM:"北美洲", regionAustralia:"澳大利亚", regionAsia:"亚洲",
+      dateLocale:"zh-CN", dows:["日","一","二","三","四","五","六"],
+      authAppTitle:"全球设备校准管理系统", authSignInTitle:"登录", authSignUpTitle:"创建账户",
+      authFullName:"姓名", authEmail:"电子邮箱", authPassword:"密码",
+      authSignInBtn:"登录", authSignUpBtn:"创建账户",
+      authToggleToSignup:"没有账户？注册", authToggleToLogin:"已有账户？登录",
+      authCheckEmail:"账户已创建。请查收邮件确认您的邮箱后再登录。",
+      authLoadingApp:"正在加载数据…", authSignOut:"退出登录",
+      roleAdmin:"管理员", roleMember:"成员",
+      loadErrorPrefix:"无法加载数据：", retry:"重试"
+    }
+  };
+  function T(k){ return (STR[state.lang] && STR[state.lang][k]) || STR.en[k] || k; }
+
+  /* =====================================================================
+     DATE HELPERS
+  ===================================================================== */
+  var TODAY = new Date();
+  TODAY.setHours(0,0,0,0);
+  var TODAY_STR = TODAY.getFullYear() + "-" + String(TODAY.getMonth()+1).padStart(2,"0") + "-" + String(TODAY.getDate()).padStart(2,"0");
+  function parseDate(s){ return new Date(s+"T00:00:00"); }
+  function daysBetween(dateStr){ return Math.round((parseDate(dateStr) - TODAY) / 86400000); }
+  function addMonths(dateStr, months){
+    var d = parseDate(dateStr);
+    var day = d.getDate();
+    d.setDate(1);
+    d.setMonth(d.getMonth() + Number(months));
+    var lastDay = new Date(d.getFullYear(), d.getMonth()+1, 0).getDate();
+    d.setDate(Math.min(day, lastDay));
+    return d.toISOString().slice(0,10);
+  }
+  function fmtDate(dateStr){
+    if(!dateStr) return "—";
+    return parseDate(dateStr).toLocaleDateString(T("dateLocale"), {day:"2-digit", month:"short", year:"numeric"});
+  }
+  function esc(str){
+    return String(str==null?"":str).replace(/[&<>"']/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+    });
+  }
+  /* =====================================================================
+     SEED DATA — Bradken global manufacturing sites
+  ===================================================================== */
+  var SITES = [
+    {id:"lima", region:"SAM", name:"Lima"},
+    {id:"chilca", region:"SAM", name:"Chilca"},
+    {id:"edmonton", region:"NAM", name:"Edmonton"},
+    {id:"montjoli", region:"NAM", name:"Mont-Joli"},
+    {id:"atchison", region:"NAM", name:"Atchison"},
+    {id:"tacoma", region:"NAM", name:"Tacoma"},
+    {id:"wodonga", region:"Australia", name:"Wodonga"},
+    {id:"wundowie", region:"Australia", name:"Wundowie"},
+    {id:"bassendean", region:"Australia", name:"Bassendean"},
+    {id:"xuzhou", region:"Asia", name:"Xuzhou"},
+    {id:"coimbatore", region:"Asia", name:"Coimbatore"},
+    {id:"merlimau", region:"Asia", name:"Merlimau"}
+  ];
+  var REGION_KEY = {SAM:"regionSAM", NAM:"regionNAM", Australia:"regionAustralia", Asia:"regionAsia"};
+  function regionLabel(region){ return T(REGION_KEY[region] || "regionSAM"); }
+  function siteName(id){ var s = SITES.filter(function(x){return x.id===id;})[0]; return s ? s.name : id; }
+  function siteRegion(id){ var s = SITES.filter(function(x){return x.id===id;})[0]; return s ? s.region : ""; }
+  // Email routing spec for the future backend reminder job (not called from this UI — there is no
+  // in-app trigger for outbound email). SAM sites -> Spanish, Xuzhou (China) -> Chinese, everyone else -> English.
+  function emailLangForSite(id){
+    if(siteRegion(id) === "SAM") return "es";
+    if(id === "xuzhou") return "zh";
+    return "en";
+  }
+
+  // Plant areas: stable English keys are the stored data value; AREA_LABEL provides the translated display text.
+  var AREAS = [
+    "Scrap Yard & Raw Materials","Molding & Core Making","Melting & Refining","Pouring","Shakeout & Fettling",
+    "Shot Blasting","Heat Treatment","Machining Shop","NDT","Quality Lab","Painting","Metalworking","Pressing",
+    "Hand-Lining","Finishing","Extrusion","Cleaning","Quality Control","Office","Other"
+  ];
+  var AREA_LABEL = {
+    en:{ "Scrap Yard & Raw Materials":"Scrap Yard & Raw Materials","Molding & Core Making":"Molding & Core Making","Melting & Refining":"Melting & Refining","Pouring":"Pouring","Shakeout & Fettling":"Shakeout & Fettling","Shot Blasting":"Shot Blasting","Heat Treatment":"Heat Treatment","Machining Shop":"Machining Shop","NDT":"NDT","Quality Lab":"Quality Lab","Painting":"Painting","Metalworking":"Metalworking","Pressing":"Pressing","Hand-Lining":"Hand-Lining","Finishing":"Finishing","Extrusion":"Extrusion","Cleaning":"Cleaning","Quality Control":"Quality Control","Office":"Office","Other":"Other" },
+    es:{ "Scrap Yard & Raw Materials":"Patio de Chatarra y Materias Primas","Molding & Core Making":"Moldeo y Fabricación de Machos","Melting & Refining":"Fusión y Refinación","Pouring":"Colada","Shakeout & Fettling":"Desmoldeo y Desbarbado","Shot Blasting":"Granallado","Heat Treatment":"Tratamiento Térmico","Machining Shop":"Taller de Mecanizado","NDT":"Ensayos No Destructivos (END)","Quality Lab":"Laboratorio de Calidad","Painting":"Pintura","Metalworking":"Trabajo en Metal","Pressing":"Prensado","Hand-Lining":"Revestimiento Manual","Finishing":"Acabado","Extrusion":"Extrusión","Cleaning":"Limpieza","Quality Control":"Control de Calidad","Office":"Oficina","Other":"Otro" },
+    zh:{ "Scrap Yard & Raw Materials":"废料场与原材料","Molding & Core Making":"造型与制芯","Melting & Refining":"熔炼与精炼","Pouring":"浇注","Shakeout & Fettling":"落砂与清理","Shot Blasting":"喷丸处理","Heat Treatment":"热处理","Machining Shop":"机加工车间","NDT":"无损检测","Quality Lab":"质量实验室","Painting":"喷漆","Metalworking":"金属加工","Pressing":"冲压","Hand-Lining":"手工衬里","Finishing":"精加工","Extrusion":"挤压","Cleaning":"清洗","Quality Control":"质量控制","Office":"办公室","Other":"其他" }
+  };
+  function areaLabel(area){ return (AREA_LABEL[state.lang] && AREA_LABEL[state.lang][area]) || area; }
+
+  var EQUIPMENT = [];
+
+  function nextCertId(siteId, dateStr){
+    var year = dateStr.slice(0,4);
+    var suffix = Date.now().toString(36).toUpperCase() + Math.random().toString(36).slice(2,5).toUpperCase();
+    return "BRK-CAL-" + siteId.slice(0,3).toUpperCase() + "-" + year + "-" + suffix;
+  }
+
+  var REGION_QA_PARTNER = {
+    SAM: "Patricia Nunez",
+    NAM: "Michael Grant",
+    Australia: "Emma Hughes",
+    Asia: "Rahul Mehta"
+  };
+
+  /* =====================================================================
+     SUPABASE DATA MAPPING — snake_case DB rows <-> camelCase app model
+  ===================================================================== */
+  function eqFromRow(r){
+    return {
+      id: r.id, tag: r.tag, name: r.name, manufacturer: r.manufacturer, model: r.model, serial: r.serial,
+      siteId: r.site_id, area: r.area, criticality: r.criticality, frequencyMonths: r.frequency_months,
+      lastCalibration: r.last_calibration, nextCalibration: r.next_calibration, manualStatus: r.manual_status,
+      unit: r.unit, rangeMin: r.range_min, rangeMax: r.range_max, emp: r.emp,
+      responsibleName: r.responsible_name, responsibleEmail: r.responsible_email,
+      tech: "", traceCert: "", uncertainty: "", calibrationHistory: []
+    };
+  }
+  function eqToRow(data){
+    return {
+      tag: data.tag, name: data.name, manufacturer: data.manufacturer, model: data.model, serial: data.serial,
+      site_id: data.siteId, area: data.area, criticality: data.criticality, frequency_months: data.frequencyMonths,
+      last_calibration: data.lastCalibration, next_calibration: data.nextCalibration, manual_status: data.manualStatus,
+      unit: data.unit, range_min: data.rangeMin, range_max: data.rangeMax, emp: data.emp,
+      responsible_name: data.responsibleName, responsible_email: data.responsibleEmail
+    };
+  }
+  function evFromRow(r){
+    return {
+      id: r.id, date: r.date, calibrationType: r.calibration_type, performedBy: r.performed_by,
+      provider: r.provider, traceCert: r.trace_cert, errorFound: r.error_found, uncertainty: r.uncertainty || "",
+      verdict: r.verdict, qaApprover: r.qa_approver, certificateId: r.certificate_id
+    };
+  }
+
+  /* =====================================================================
+     STATE
+  ===================================================================== */
+  var state = {
+    lang: "en",
+    currentView: "dashboard",
+    currentSite: SITES[0].id,
+    equipment: EQUIPMENT,
+    searchQuery: "",
+    filters: {status:"all", criticality:"all", area:"all"},
+    sortKey: "nextCalibration",
+    sortDir: "asc",
+    scheduleRange: 30,
+    calendarMonthOffset: 0,
+    selectedDay: null,
+    modal: null,
+    certificate: null,
+    toast: null,
+    formError: null,
+    session: null,
+    profile: null,
+    dataLoading: false,
+    loadError: null,
+    authMode: "login",
+    authError: null,
+    authBusy: false,
+    authNotice: null
+  };
+  function isAdmin(){ return !!(state.profile && state.profile.role === "admin"); }
+
+  /* =====================================================================
+     DERIVED
+  ===================================================================== */
+  // Current status is exactly one of: Approved / Conditional / Out of Service / Overdue
+  function currentStatus(eq){
+    if(eq.manualStatus === "Out of Service") return "Out of Service";
+    if(daysBetween(eq.nextCalibration) < 0) return "Overdue";
+    return eq.manualStatus;
+  }
+  function isDueSoon(eq){
+    var st = currentStatus(eq);
+    if(st !== "Approved" && st !== "Conditional") return false;
+    var d = daysBetween(eq.nextCalibration);
+    return d >= 0 && d <= 30;
+  }
+  function statusTagClass(st){
+    return {Approved:"tag-ok", Conditional:"tag-warn", Overdue:"tag-crit", "Out of Service":"tag-oos"}[st];
+  }
+  var STATUS_KEY = {Approved:"statusApproved", Conditional:"statusConditional", Overdue:"statusOverdue", "Out of Service":"statusOOS"};
+  function statusLabel(st){ return T(STATUS_KEY[st] || "statusApproved"); }
+  function scopedEquipment(){ return state.equipment.filter(function(eq){ return eq.siteId === state.currentSite; }); }
+  function critLabel(c){ return c === "High" ? T("critHigh") : c === "Medium" ? T("critMedium") : T("critLow"); }
+  function critPillHtml(c){
+    var cls = c === "High" ? "crit-high" : c === "Medium" ? "crit-medium" : "crit-low";
+    return '<span class="crit-pill '+cls+'">'+esc(critLabel(c))+'</span>';
+  }
+  function statusTagHtml(st){
+    return '<span class="tag '+statusTagClass(st)+'"><span class="dot"></span>'+esc(statusLabel(st))+'</span>';
+  }
+
+  /* =====================================================================
+     SHELL / RENDER
+  ===================================================================== */
+  var app = document.getElementById("app");
+
+  function withFocusPreserved(fn){
+    var active = document.activeElement;
+    var id = active && active.id;
+    var selStart, selEnd;
+    if(active && typeof active.selectionStart === "number"){ selStart = active.selectionStart; selEnd = active.selectionEnd; }
+    fn();
+    if(id){
+      var el = document.getElementById(id);
+      if(el){
+        el.focus();
+        if(selStart != null && el.setSelectionRange){ try{ el.setSelectionRange(selStart, selEnd); }catch(e){} }
+      }
+    }
+  }
+  function render(){
+    withFocusPreserved(function(){
+      if(!state.session){ app.innerHTML = authViewHtml(); return; }
+      if(state.dataLoading){ app.innerHTML = loadingViewHtml(); return; }
+      if(state.loadError){ app.innerHTML = loadErrorViewHtml(); return; }
+      app.innerHTML = shellHtml();
+    });
+  }
+
+  function loadingViewHtml(){
+    return '<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;color:var(--text-dim);font-size:13px;font-weight:600;">'+esc(T("authLoadingApp"))+'</div>';
+  }
+
+  function loadErrorViewHtml(){
+    return '<div style="min-height:100vh;display:flex;flex-direction:column;gap:12px;align-items:center;justify-content:center;color:var(--crit);font-size:13px;font-weight:600;">' +
+      '<div>'+esc(T("loadErrorPrefix"))+' '+esc(state.loadError)+'</div>' +
+      '<button type="button" class="btn btn-primary" data-action="retry-load">'+esc(T("retry"))+'</button>' +
+    '</div>';
+  }
+
+  function authViewHtml(){
+    var isSignup = state.authMode === "signup";
+    var errorHtml = state.authError ? '<div class="form-error">'+esc(state.authError)+'</div>' : "";
+    var noticeHtml = state.authNotice ? '<div class="hint" style="margin-top:8px;">'+esc(state.authNotice)+'</div>' : "";
+    return '' +
+    '<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:var(--bg);">' +
+      '<div class="modal" style="max-width:380px;">' +
+        '<div class="modal-head" style="flex-direction:column;align-items:flex-start;gap:8px;">' +
+          '<div class="logo-lockup">' + logoMarkSvg() + '<div class="logo-text"><b>BRADKEN</b><span>'+esc(T("authAppTitle"))+'</span></div></div>' +
+        '</div>' +
+        '<form id="auth-form">' +
+          '<div class="modal-body">' +
+            '<h3 style="margin-bottom:14px;">'+esc(isSignup?T("authSignUpTitle"):T("authSignInTitle"))+'</h3>' +
+            (isSignup ? '<div class="field" style="margin-bottom:12px;"><label>'+esc(T("authFullName"))+' <span class="req">*</span></label><input type="text" name="fullName" required/></div>' : '') +
+            '<div class="field" style="margin-bottom:12px;"><label>'+esc(T("authEmail"))+' <span class="req">*</span></label><input type="email" name="email" required/></div>' +
+            '<div class="field"><label>'+esc(T("authPassword"))+' <span class="req">*</span></label><input type="password" name="password" required minlength="6"/></div>' +
+            errorHtml + noticeHtml +
+          '</div>' +
+          '<div class="modal-foot" style="flex-direction:column;align-items:stretch;gap:10px;">' +
+            '<button type="submit" class="btn btn-primary" style="justify-content:center;"'+(state.authBusy?" disabled":"")+'>'+esc(isSignup?T("authSignUpBtn"):T("authSignInBtn"))+'</button>' +
+            '<button type="button" class="btn btn-ghost" style="justify-content:center;" data-action="toggle-auth-mode">'+esc(isSignup?T("authToggleToLogin"):T("authToggleToSignup"))+'</button>' +
+          '</div>' +
+        '</form>' +
+      '</div>' +
+    '</div>';
+  }
+
+  var BRADKEN_LOGO_B64 = "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";
+  function logoMarkSvg(){
+    return '<span class="logo-mark"><img src="data:image/jpeg;base64,'+BRADKEN_LOGO_B64+'" alt="Bradken logo"/></span>';
+  }
+
+  function navIcon(name){
+    var icons = {
+      dashboard:'<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>',
+      equipment:'<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 21h8M12 18v3"/></svg>',
+      events:'<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+      schedule:'<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
+      global:'<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.5 3.5 5.8 3.5 9s-1 6.5-3.5 9c-2.5-2.5-3.5-5.8-3.5-9s1-6.5 3.5-9Z"/></svg>'
+    };
+    return icons[name] || "";
+  }
+
+  function shellHtml(){
+    var siteOptsByRegion = {};
+    SITES.forEach(function(s){ (siteOptsByRegion[s.region] = siteOptsByRegion[s.region]||[]).push(s); });
+    var regionOrder = ["SAM","NAM","Australia","Asia"];
+    var siteOptionsHtml = regionOrder.map(function(r){
+      var group = (siteOptsByRegion[r]||[]).map(function(s){
+        return '<option value="'+s.id+'"'+(state.currentSite===s.id?" selected":"")+'>'+esc(s.name)+'</option>';
+      }).join("");
+      return '<optgroup label="'+esc(regionLabel(r))+'">'+group+'</optgroup>';
+    }).join("");
+    var langOptions = [["en","English"],["es","Español"],["zh","中文（普通话）"]].map(function(p){
+      return '<option value="'+p[0]+'"'+(state.lang===p[0]?" selected":"")+'>'+esc(p[1])+'</option>';
+    }).join("");
+
+    return '' +
+    '<header class="header">' +
+      '<div class="logo-lockup">' + logoMarkSvg() +
+        '<div class="logo-text"><b>BRADKEN</b><span>'+esc(T("appTitle"))+'</span></div>' +
+      '</div>' +
+      '<div class="header-spacer"></div>' +
+      '<div class="header-right">' +
+        '<div class="lang-select-wrap">' +
+          '<label>'+esc(T("language"))+'</label>' +
+          '<select class="lang-select" id="lang-select">'+langOptions+'</select>' +
+        '</div>' +
+        '<div class="site-select-wrap">' +
+          '<label>'+esc(T("manufacturingSite"))+'</label>' +
+          '<select class="site-select" id="site-select">'+siteOptionsHtml+'</select>' +
+        '</div>' +
+        '<div class="site-select-wrap">' +
+          '<label>&nbsp;</label>' +
+          '<div style="display:flex;align-items:center;gap:8px;">' +
+            '<span class="cell-sub" title="'+esc(state.session&&state.session.user&&state.session.user.email||"")+'">'+esc((state.profile&&state.profile.fullName)||(state.session&&state.session.user&&state.session.user.email)||"")+' · '+esc(isAdmin()?T("roleAdmin"):T("roleMember"))+'</span>' +
+            '<button type="button" class="btn btn-ghost btn-sm" data-action="sign-out">'+esc(T("authSignOut"))+'</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+    '</header>' +
+    '<div class="shell-body">' +
+      '<aside class="sidebar"><nav class="nav">' +
+        navItem("dashboard",T("navDashboard")) +
+        navItem("equipment",T("navEquipment")) +
+        navItem("events",T("navEvents")) +
+        navItem("schedule",T("navSchedule")) +
+        navItem("global",T("navGlobal")) +
+      '</nav></aside>' +
+      '<div class="main"><div class="view">' + viewHtml() + '</div></div>' +
+    '</div>' +
+    modalHtml() + toastHtml();
+  }
+
+  function navItem(view, label){
+    var active = state.currentView === view;
+    return '<button class="nav-item'+(active?" active":"")+'" data-action="nav" data-view="'+view+'">' +
+      navIcon(view) + '<span>'+esc(label)+'</span></button>';
+  }
+
+  function viewHtml(){
+    if(state.certificate) return certificateViewHtml(state.certificate);
+    switch(state.currentView){
+      case "equipment": return equipmentViewHtml();
+      case "events": return eventsViewHtml();
+      case "schedule": return scheduleViewHtml();
+      case "global": return globalViewHtml();
+      default: return dashboardViewHtml();
+    }
+  }
+
+  /* =====================================================================
+     DASHBOARD
+  ===================================================================== */
+  function dashboardViewHtml(){
+    var scoped = scopedEquipment();
+    var buckets = {Approved:[], Conditional:[], Overdue:[], "Out of Service":[]};
+    scoped.forEach(function(eq){ buckets[currentStatus(eq)].push(eq); });
+    var dueSoon = scoped.filter(isDueSoon);
+
+    var activeCount = scoped.length - buckets["Out of Service"].length;
+    var compliant = buckets.Approved.length;
+    var pct = activeCount > 0 ? Math.round((compliant/activeCount)*100) : 0;
+    var pctColor = pct >= 90 ? "var(--ok)" : pct >= 70 ? "var(--warn)" : "var(--crit)";
+
+    var kpi = '<div class="kpi-row">' +
+      kpiCard(T("kpiTotal"), scoped.length, "var(--text)") +
+      kpiCard(T("kpiApproved"), buckets.Approved.length, "var(--ok)") +
+      kpiCard(T("kpiDueSoon"), dueSoon.length, "var(--warn)") +
+      kpiCard(T("kpiOverdue"), buckets.Overdue.length, "var(--crit)") +
+      kpiCard(T("kpiOOS"), buckets["Out of Service"].length, "var(--oos)") +
+    '</div>';
+
+    var compliance = '<div class="compliance-panel">' +
+      '<div class="compliance-head"><h2>'+esc(T("complianceTitle"))+' '+esc(siteName(state.currentSite))+'</h2><span class="compliance-pct" style="color:'+pctColor+'">'+pct+'%</span></div>' +
+      '<div class="compliance-track"><div class="compliance-fill" style="width:'+pct+'%;background:'+pctColor+'"></div></div>' +
+      '<div class="compliance-legend">' +
+        legendItem("var(--ok)",statusLabel("Approved")) + legendItem("var(--warn)",statusLabel("Conditional")) +
+        legendItem("var(--crit)",statusLabel("Overdue")) + legendItem("var(--oos)",statusLabel("Out of Service")) +
+      '</div>' +
+    '</div>';
+
+    var alertList = buckets.Overdue.slice().sort(function(a,b){ return daysBetween(a.nextCalibration)-daysBetween(b.nextCalibration); })
+      .concat(dueSoon.filter(function(e){ return e.criticality === "High"; }))
+      .slice(0,8);
+    var alertsHtml = alertList.length ? alertList.map(function(eq){
+      var d = daysBetween(eq.nextCalibration);
+      var st = currentStatus(eq);
+      var dayStr = d < 0 ? Math.abs(d)+" "+T("daysOverdueSuffix") : (d===0 ? T("dueTodayLabel") : d+" "+T("daysSuffix"));
+      return '<div class="alert-row">' + statusTagHtml(st) +
+        '<div class="a-main"><div class="a-tag">'+esc(eq.tag)+'</div><div class="a-name">'+esc(eq.name)+' · '+esc(areaLabel(eq.area))+'</div></div>' +
+        '<div class="a-days" style="color:'+(st==="Overdue"?"var(--crit)":"var(--warn)")+'">'+esc(dayStr)+'</div>' +
+        '<button class="btn btn-sm" data-action="open-event" data-id="'+eq.id+'">'+esc(T("logEvent"))+'</button>' +
+      '</div>';
+    }).join("") : '<div class="empty-state">'+esc(T("noCriticalAlerts"))+'</div>';
+
+    var areaMap = {};
+    scoped.forEach(function(eq){ (areaMap[eq.area]=areaMap[eq.area]||[]).push(eq); });
+    var areaRows = Object.keys(areaMap).sort().map(function(area){
+      var list = areaMap[area];
+      var b = {Approved:0, Conditional:0, Overdue:0, "Out of Service":0};
+      list.forEach(function(eq){ b[currentStatus(eq)]++; });
+      var total = list.length || 1;
+      function seg(key, color){ var p = b[key]/total*100; return p>0 ? '<span class="area-seg" style="width:'+p+'%;background:'+color+'"></span>' : ""; }
+      return '<div class="area-row"><div class="s-label">'+esc(areaLabel(area))+'</div><div class="area-track">' +
+        seg("Approved","var(--ok)") + seg("Conditional","var(--warn)") + seg("Overdue","var(--crit)") + seg("Out of Service","var(--oos)") +
+        '</div><div class="s-count mono">'+list.length+'</div></div>';
+    }).join("");
+
+    return kpi + compliance +
+    '<div class="grid-2">' +
+      '<div class="panel"><div class="panel-head"><h2>'+esc(T("criticalAlerts"))+'</h2></div><div class="panel-body flush">'+alertsHtml+'</div></div>' +
+      '<div class="panel"><div class="panel-head"><h2>'+esc(T("statusByArea"))+'</h2></div><div class="panel-body">'+(areaRows||'<div class="empty-state">'+esc(T("noEquipmentAtSite"))+'</div>')+'</div></div>' +
+    '</div>';
+  }
+  function kpiCard(label, value, color){
+    return '<div class="kpi" style="--k-color:'+color+'"><div class="k-label">'+esc(label)+'</div><div class="k-value">'+value+'</div></div>';
+  }
+  function legendItem(color, label){
+    return '<div class="li"><span class="sw" style="background:'+color+'"></span>'+esc(label)+'</div>';
+  }
+
+  /* =====================================================================
+     MASTER EQUIPMENT LIST
+  ===================================================================== */
+  function filteredSortedEquipment(){
+    var q = state.searchQuery.trim().toLowerCase();
+    var list = scopedEquipment().filter(function(eq){
+      if(state.filters.status !== "all" && currentStatus(eq) !== state.filters.status) return false;
+      if(state.filters.criticality !== "all" && eq.criticality !== state.filters.criticality) return false;
+      if(state.filters.area !== "all" && eq.area !== state.filters.area) return false;
+      if(q){
+        var hay = (eq.id+" "+eq.tag+" "+eq.name+" "+eq.serial+" "+eq.manufacturer+" "+eq.model+" "+(eq.responsibleName||"")).toLowerCase();
+        if(hay.indexOf(q) === -1) return false;
+      }
+      return true;
+    });
+    var key = state.sortKey, dir = state.sortDir === "asc" ? 1 : -1;
+    list.sort(function(a,b){
+      var va = a[key], vb = b[key];
+      if(key === "criticality"){ var order = {High:3, Medium:2, Low:1}; va = order[a.criticality]; vb = order[b.criticality]; }
+      if(va < vb) return -1*dir;
+      if(va > vb) return 1*dir;
+      return 0;
+    });
+    return list;
+  }
+  function sortArrow(key){ if(state.sortKey !== key) return ""; return '<span class="arrow">'+(state.sortDir==="asc"?"▲":"▼")+'</span>'; }
+  function th(label, sortKey){ return '<th class="sortable" data-action="sort" data-key="'+sortKey+'">'+esc(label)+sortArrow(sortKey)+'</th>'; }
+
+  function equipmentViewHtml(){
+    var list = filteredSortedEquipment();
+    var rowsHtml = list.length ? list.map(function(eq){
+      var st = currentStatus(eq);
+      var rowClass = st === "Overdue" ? "row-crit" : (isDueSoon(eq) ? "row-warn" : "");
+      return '<tr class="'+rowClass+'">' +
+        '<td class="cell-tag">'+esc(eq.id)+'</td>' +
+        '<td><div class="cell-name">'+esc(eq.tag)+' — '+esc(eq.name)+'</div></td>' +
+        '<td class="cell-sub">'+esc(areaLabel(eq.area))+'</td>' +
+        '<td class="cell-sub">'+esc(eq.manufacturer)+'</td>' +
+        '<td class="cell-sub">'+esc(eq.model)+'</td>' +
+        '<td class="mono cell-sub">'+esc(eq.serial)+'</td>' +
+        '<td class="mono">'+esc(eq.unit)+'</td>' +
+        '<td class="mono">'+eq.rangeMin+' – '+eq.rangeMax+'</td>' +
+        '<td class="mono">'+esc(eq.emp)+'</td>' +
+        '<td>'+critPillHtml(eq.criticality)+'</td>' +
+        '<td class="mono">'+eq.frequencyMonths+'m</td>' +
+        '<td class="mono">'+esc(fmtDate(eq.lastCalibration))+'</td>' +
+        '<td class="mono">'+esc(fmtDate(eq.nextCalibration))+(isDueSoon(eq)?'<span class="due-soon-flag">●</span>':'')+'</td>' +
+        '<td>'+statusTagHtml(st)+'</td>' +
+        '<td><div class="cell-name">'+esc(eq.responsibleName||"—")+'</div><div class="cell-sub">'+esc(eq.responsibleEmail||"")+'</div></td>' +
+        '<td><div class="row-actions">' +
+          iconBtn("log","open-event",eq.id,T("titleRegisterEvent")) +
+          iconBtn("edit","edit-equipment",eq.id,T("titleEditEquipment")) +
+          (isAdmin() ? iconBtn("trash","delete-equipment",eq.id,T("titleDeleteEquipment"),true) : "") +
+        '</div></td>' +
+      '</tr>';
+    }).join("") : '<tr><td colspan="16"><div class="empty-state">'+esc(T("noEquipmentMatches"))+' '+esc(siteName(state.currentSite))+'.</div></td></tr>';
+
+    return '<div class="panel">' +
+      '<div class="toolbar">' +
+        '<div class="search-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>' +
+          '<input id="search-input" type="text" placeholder="'+esc(T("searchPh"))+'" value="'+esc(state.searchQuery)+'"/></div>' +
+        '<select class="filter" data-bind="filter-status">' +
+          '<option value="all">'+esc(T("filterAllStatus"))+'</option>' +
+          '<option value="Approved"'+(state.filters.status==="Approved"?" selected":"")+'>'+esc(statusLabel("Approved"))+'</option>' +
+          '<option value="Conditional"'+(state.filters.status==="Conditional"?" selected":"")+'>'+esc(statusLabel("Conditional"))+'</option>' +
+          '<option value="Overdue"'+(state.filters.status==="Overdue"?" selected":"")+'>'+esc(statusLabel("Overdue"))+'</option>' +
+          '<option value="Out of Service"'+(state.filters.status==="Out of Service"?" selected":"")+'>'+esc(statusLabel("Out of Service"))+'</option>' +
+        '</select>' +
+        '<select class="filter" data-bind="filter-criticality">' +
+          '<option value="all">'+esc(T("filterAllCriticality"))+'</option>' +
+          '<option value="High"'+(state.filters.criticality==="High"?" selected":"")+'>'+esc(T("critHigh"))+'</option>' +
+          '<option value="Medium"'+(state.filters.criticality==="Medium"?" selected":"")+'>'+esc(T("critMedium"))+'</option>' +
+          '<option value="Low"'+(state.filters.criticality==="Low"?" selected":"")+'>'+esc(T("critLow"))+'</option>' +
+        '</select>' +
+        '<select class="filter" data-bind="filter-area">' +
+          '<option value="all">'+esc(T("filterAllAreas"))+'</option>' +
+          AREAS.map(function(a){ return '<option value="'+a+'"'+(state.filters.area===a?" selected":"")+'>'+esc(areaLabel(a))+'</option>'; }).join("") +
+        '</select>' +
+        '<div class="toolbar-spacer"></div>' +
+        '<div class="cell-sub">'+list.length+' / '+scopedEquipment().length+'</div>' +
+        '<button class="btn btn-primary" data-action="open-add-equipment">'+esc(T("addEquipmentBtn"))+'</button>' +
+      '</div>' +
+      '<div class="table-wrap"><table class="data"><thead><tr>' +
+        th(T("colEquipmentId"),"id") + '<th>'+esc(T("colEquipmentTag"))+'</th>' + th(T("colPlantArea"),"area") + '<th>'+esc(T("colManufacturer"))+'</th>' + '<th>'+esc(T("colModel"))+'</th>' + '<th>'+esc(T("colSerial"))+'</th>' +
+        '<th>'+esc(T("colUnit"))+'</th>' + '<th>'+esc(T("colRange"))+'</th>' + '<th>'+esc(T("colTolerance"))+'</th>' + th(T("colCriticality"),"criticality") + '<th>'+esc(T("colFreq"))+'</th>' +
+        th(T("colLastCal"),"lastCalibration") + th(T("colNextCal"),"nextCalibration") + '<th>'+esc(T("colStatus"))+'</th>' + '<th>'+esc(T("colResponsible"))+'</th>' + '<th style="text-align:right">'+esc(T("colActions"))+'</th>' +
+      '</tr></thead><tbody>'+rowsHtml+'</tbody></table></div>' +
+    '</div>';
+  }
+  function iconBtn(icon, action, id, title, danger){
+    var paths = {
+      log:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+      edit:'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>',
+      trash:'<path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>'
+    };
+    return '<button class="icon-btn'+(danger?" danger":"")+'" data-action="'+action+'" data-id="'+id+'" title="'+esc(title)+'" aria-label="'+esc(title)+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">'+paths[icon]+'</svg></button>';
+  }
+
+  /* =====================================================================
+     EVENT REGISTRATION & CERTIFICATES
+  ===================================================================== */
+  function allEvents(){
+    var events = [];
+    scopedEquipment().forEach(function(eq){ (eq.calibrationHistory||[]).forEach(function(ev){ events.push({eq:eq, ev:ev}); }); });
+    events.sort(function(a,b){ return b.ev.date.localeCompare(a.ev.date); });
+    return events;
+  }
+  function verdictShort(v){ return v === "PASS" ? T("verdictPassShort") : T("verdictFailShort"); }
+  function calTypeLabel(t){ return t === "Internal" ? T("typeInternal") : T("typeExternal"); }
+  function eventsViewHtml(){
+    var events = allEvents();
+    var rowsHtml = events.length ? events.map(function(item){
+      var eq = item.eq, ev = item.ev;
+      return '<div class="task-row">' +
+        '<div class="t-date">'+esc(fmtDate(ev.date))+'</div>' +
+        '<div class="t-main"><div class="t-tag">'+esc(eq.tag)+' — '+esc(eq.name)+'</div><div class="t-name">'+esc(ev.provider)+' · '+esc(ev.traceCert)+'</div></div>' +
+        '<span class="crit-pill crit-low">'+esc(calTypeLabel(ev.calibrationType))+'</span>' +
+        '<span class="tag '+(ev.verdict==="PASS"?"tag-ok":"tag-crit")+'"><span class="dot"></span>'+esc(verdictShort(ev.verdict))+'</span>' +
+        '<button class="btn btn-sm" data-action="view-cert" data-eq="'+eq.id+'" data-ev="'+ev.id+'">'+esc(T("viewCertificate"))+'</button>' +
+      '</div>';
+    }).join("") : '<div class="empty-state">'+esc(T("noEventsYet"))+' '+esc(siteName(state.currentSite))+'.</div>';
+
+    return '<div class="panel">' +
+      '<div class="panel-head"><h2>'+esc(T("eventLogTitle"))+' '+esc(siteName(state.currentSite))+'</h2>' +
+        '<div class="toolbar-spacer"></div>' +
+        '<button class="btn btn-primary" data-action="open-event">'+esc(T("registerNewEvent"))+'</button>' +
+      '</div>' +
+      '<div class="reminder-banner">'+esc(T("eventsPermanentNote"))+'</div>' +
+      '<div class="panel-body flush">'+rowsHtml+'</div>' +
+    '</div>';
+  }
+
+  /* =====================================================================
+     PREVENTIVE SCHEDULE
+  ===================================================================== */
+  function calendarEligible(eq){
+    var st = currentStatus(eq);
+    if(st === "Overdue") return "crit";
+    if(isDueSoon(eq)) return "warn";
+    return null;
+  }
+
+  function scheduleViewHtml(){
+    var scoped = scopedEquipment().filter(function(eq){ return currentStatus(eq) !== "Out of Service"; });
+    var overdue = scoped.filter(function(eq){ return currentStatus(eq) === "Overdue"; })
+      .sort(function(a,b){ return daysBetween(a.nextCalibration)-daysBetween(b.nextCalibration); });
+    var within = scoped.filter(function(eq){ var d = daysBetween(eq.nextCalibration); return d >= 0 && d <= state.scheduleRange; })
+      .sort(function(a,b){ return daysBetween(a.nextCalibration)-daysBetween(b.nextCalibration); });
+
+    if(state.selectedDay){
+      overdue = overdue.filter(function(eq){ return eq.nextCalibration === state.selectedDay; });
+      within = within.filter(function(eq){ return eq.nextCalibration === state.selectedDay; });
+    }
+
+    function taskRow(eq){
+      return '<div class="task-row">' +
+        '<div class="t-date">'+esc(fmtDate(eq.nextCalibration))+'</div>' +
+        '<div class="t-main"><div class="t-tag">'+esc(eq.tag)+'</div><div class="t-name">'+esc(eq.name)+' · '+esc(areaLabel(eq.area))+'</div></div>' +
+        statusTagHtml(currentStatus(eq)) +
+        '<button class="btn btn-sm" data-action="open-event" data-id="'+eq.id+'">'+esc(T("logEvent"))+'</button>' +
+      '</div>';
+    }
+    var overdueHtml = overdue.length ? overdue.map(taskRow).join("") : '<div class="empty-state">'+esc(T("nothingOverdue"))+'</div>';
+    var withinHtml = within.length ? within.map(taskRow).join("") : '<div class="empty-state">'+esc(T("nothingDueWindow"))+'</div>';
+
+    var lists = '' +
+      (overdue.length ? '<div class="panel"><div class="panel-head"><h2 style="color:var(--crit)">'+esc(T("overdueImmediate"))+'</h2></div><div class="panel-body flush">'+overdueHtml+'</div></div>' : '') +
+      '<div class="panel">' +
+        '<div class="panel-head"><h2>'+esc(T("upcomingCalibrations"))+' '+esc(siteName(state.currentSite))+'</h2>' +
+          '<div class="toolbar-spacer"></div>' +
+          '<div class="range-tabs">' + [30,60,90].map(function(n){ return '<button class="'+(state.scheduleRange===n?"active":"")+'" data-action="set-range" data-range="'+n+'">'+n+' '+esc(T("daysTab"))+'</button>'; }).join("") + '</div>' +
+        '</div>' +
+        (state.selectedDay ? '<div class="toolbar"><div class="cell-sub">'+esc(T("filteredTo"))+' <strong class="mono">'+esc(fmtDate(state.selectedDay))+'</strong></div><div class="toolbar-spacer"></div><button class="btn btn-sm btn-ghost" data-action="clear-day">'+esc(T("clear"))+'</button></div>' : '') +
+        '<div class="panel-body flush">'+withinHtml+'</div>' +
+      '</div>';
+
+    var calendar = '<div class="panel">' +
+      '<div class="panel-head"><h2>'+esc(T("calibrationCalendar"))+' '+esc(siteName(state.currentSite))+'</h2>' +
+        '<div class="toolbar-spacer"></div>' +
+        '<button class="cal-nav-btn" data-action="cal-prev" aria-label="Previous month"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 6l-6 6 6 6"/></svg></button>' +
+        '<button class="cal-nav-btn" data-action="cal-next" aria-label="Next month"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></button>' +
+      '</div>' +
+      '<div class="panel-body">' + calendarHtml(scoped) + '</div>' +
+    '</div>';
+
+    return '<div class="grid-2"><div>'+lists+'</div>'+calendar+'</div>';
+  }
+
+  function calendarHtml(scoped){
+    var base = new Date(TODAY.getFullYear(), TODAY.getMonth() + state.calendarMonthOffset, 1);
+    var year = base.getFullYear(), month = base.getMonth();
+    var firstDow = new Date(year, month, 1).getDay();
+    var daysInMonth = new Date(year, month+1, 0).getDate();
+    var prevDays = new Date(year, month, 0).getDate();
+
+    var eventsByDay = {};
+    scoped.forEach(function(eq){
+      var c = calendarEligible(eq);
+      if(!c) return;
+      (eventsByDay[eq.nextCalibration] = eventsByDay[eq.nextCalibration] || []).push(c);
+    });
+
+    var monthLabel = base.toLocaleDateString(T("dateLocale"), {month:"long", year:"numeric"});
+    var dows = STR[state.lang] ? STR[state.lang].dows : STR.en.dows;
+
+    var cells = "";
+    for(var i=0;i<firstDow;i++){
+      var pd = prevDays - firstDow + 1 + i;
+      cells += '<div class="cal-cell out"><div class="d-num">'+pd+'</div></div>';
+    }
+    for(var d=1; d<=daysInMonth; d++){
+      var mm = String(month+1).padStart(2,"0"), dd = String(d).padStart(2,"0");
+      var dateStr = year+"-"+mm+"-"+dd;
+      var isToday = dateStr === TODAY_STR;
+      var evs = eventsByDay[dateStr] || [];
+      var selected = state.selectedDay === dateStr;
+      var dots = evs.slice(0,4).map(function(c){
+        return '<span class="cal-dot" style="background:'+(c==="crit"?"var(--crit)":"var(--warn)")+'"></span>';
+      }).join("");
+      cells += '<div class="cal-cell'+(isToday?" today":"")+(evs.length?" has-events":"")+(selected?" selected":"")+'"' +
+        (evs.length ? ' data-action="select-day" data-day="'+dateStr+'"' : '') + '>' +
+        '<div class="d-num">'+d+'</div>' + (dots ? '<div class="cal-dots">'+dots+'</div>' : '') +
+      '</div>';
+    }
+    var totalCells = firstDow + daysInMonth;
+    var trailing = (7 - (totalCells % 7)) % 7;
+    for(var t=1;t<=trailing;t++){ cells += '<div class="cal-cell out"><div class="d-num">'+t+'</div></div>'; }
+
+    return '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;"><strong style="text-transform:capitalize;font-size:13px;">'+esc(monthLabel)+'</strong></div>' +
+      '<div class="cal-grid">' + dows.map(function(x){ return '<div class="cal-dow">'+esc(x)+'</div>'; }).join("") + cells + '</div>' +
+      '<div class="cal-legend">' + legendItem("var(--warn)",T("dueSoonLegend")) + legendItem("var(--crit)",T("overdueLegend")) + '</div>';
+  }
+
+  /* =====================================================================
+     ALL SITES OVERVIEW (global, cross-site — ignores the site selector)
+  ===================================================================== */
+  function globalViewHtml(){
+    var siteStats = SITES.map(function(s){
+      var list = state.equipment.filter(function(eq){ return eq.siteId === s.id; });
+      var buckets = {Approved:0, Conditional:0, Overdue:0, "Out of Service":0};
+      list.forEach(function(eq){ buckets[currentStatus(eq)]++; });
+      var dueSoon = list.filter(isDueSoon).length;
+      var active = list.length - buckets["Out of Service"];
+      var pct = active > 0 ? Math.round((buckets.Approved/active)*100) : null;
+      return {site:s, total:list.length, approved:buckets.Approved, conditional:buckets.Conditional, dueSoon:dueSoon, overdue:buckets.Overdue, oos:buckets["Out of Service"], pct:pct};
+    });
+
+    var totalAll = state.equipment.length;
+    var approvedAll = siteStats.reduce(function(s,r){ return s+r.approved; }, 0);
+    var dueSoonAll = siteStats.reduce(function(s,r){ return s+r.dueSoon; }, 0);
+    var overdueAll = siteStats.reduce(function(s,r){ return s+r.overdue; }, 0);
+    var oosAll = siteStats.reduce(function(s,r){ return s+r.oos; }, 0);
+
+    var kpi = '<div class="kpi-row">' +
+      kpiCard(T("kpiNetworkTotal"), totalAll, "var(--text)") +
+      kpiCard(T("kpiApprovedNetwork"), approvedAll, "var(--ok)") +
+      kpiCard(T("kpiDueSoon"), dueSoonAll, "var(--warn)") +
+      kpiCard(T("kpiOverdue"), overdueAll, "var(--crit)") +
+      kpiCard(T("kpiOOS"), oosAll, "var(--oos)") +
+    '</div>';
+
+    var regionOrder = ["SAM","NAM","Australia","Asia"];
+    var bodyRows = regionOrder.map(function(r){
+      var group = siteStats.filter(function(x){ return x.site.region === r; });
+      var groupHead = '<tr><td colspan="7" style="background:var(--surface-alt);font-size:10px;text-transform:uppercase;letter-spacing:.6px;font-weight:700;color:var(--text-dim);padding:7px 10px;">'+esc(regionLabel(r))+'</td></tr>';
+      var groupBody = group.map(function(x){
+        var pctColor = x.pct == null ? "var(--text-faint)" : x.pct >= 90 ? "var(--ok)" : x.pct >= 70 ? "var(--warn)" : "var(--crit)";
+        var isCurrent = x.site.id === state.currentSite;
+        return '<tr class="site-row" data-action="goto-site" data-site="'+x.site.id+'">' +
+          '<td class="cell-name">'+esc(x.site.name)+(isCurrent?' <span class="cell-sub">'+esc(T("selectedTag"))+'</span>':'')+'</td>' +
+          '<td class="mono">'+x.total+'</td>' +
+          '<td class="mono" style="color:var(--ok)">'+x.approved+'</td>' +
+          '<td class="mono" style="color:var(--warn)">'+x.dueSoon+'</td>' +
+          '<td class="mono" style="color:'+(x.overdue>0?"var(--crit)":"var(--text-faint)")+';font-weight:'+(x.overdue>0?"700":"400")+'">'+x.overdue+'</td>' +
+          '<td class="mono" style="color:var(--oos)">'+x.oos+'</td>' +
+          '<td class="mono" style="color:'+pctColor+';font-weight:700">'+(x.pct==null?"—":x.pct+"%")+'</td>' +
+        '</tr>';
+      }).join("");
+      return groupHead + groupBody;
+    }).join("");
+
+    var table = '<div class="panel">' +
+      '<div class="panel-head"><h2>'+esc(T("siteCompliance"))+'</h2><div class="cell-sub">'+esc(T("clickRowToSwitch"))+'</div></div>' +
+      '<div class="table-wrap"><table class="data"><thead><tr>' +
+        '<th>'+esc(T("colSite"))+'</th><th>'+esc(T("colTotal"))+'</th><th>'+esc(statusLabel("Approved"))+'</th><th>'+esc(T("colDueSoon"))+'</th><th>'+esc(statusLabel("Overdue"))+'</th><th>'+esc(statusLabel("Out of Service"))+'</th><th>'+esc(T("colCompliance"))+'</th>' +
+      '</tr></thead><tbody>'+bodyRows+'</tbody></table></div>' +
+    '</div>';
+
+    var overdueAllList = state.equipment.filter(function(eq){ return currentStatus(eq) === "Overdue"; })
+      .sort(function(a,b){ return daysBetween(a.nextCalibration)-daysBetween(b.nextCalibration); });
+    var alertsHtml = overdueAllList.length ? overdueAllList.map(function(eq){
+      var d = Math.abs(daysBetween(eq.nextCalibration));
+      return '<div class="alert-row">' + statusTagHtml("Overdue") +
+        '<div class="a-main"><div class="a-tag">'+esc(eq.tag)+'</div><div class="a-name">'+esc(eq.name)+' · '+esc(siteName(eq.siteId))+'</div></div>' +
+        '<div class="a-days" style="color:var(--crit)">'+d+' '+esc(T("daysOverdueSuffix"))+'</div>' +
+        '<button class="btn btn-sm" data-action="goto-site" data-site="'+eq.siteId+'">'+esc(T("goToSite"))+'</button>' +
+      '</div>';
+    }).join("") : '<div class="empty-state">'+esc(T("noOverdueNetwork"))+'</div>';
+
+    var alertsPanel = '<div class="panel"><div class="panel-head"><h2>'+esc(T("networkAlerts"))+'</h2></div><div class="panel-body flush">'+alertsHtml+'</div></div>';
+
+    return kpi + table + alertsPanel;
+  }
+
+  /* =====================================================================
+     MODALS
+  ===================================================================== */
+  function modalHtml(){
+    if(!state.modal) return "";
+    var m = state.modal;
+    if(m.type === "equipment") return equipmentModalHtml(m.data);
+    if(m.type === "event") return eventModalHtml(m.data);
+    if(m.type === "confirm-delete") return confirmDeleteModalHtml(m.data);
+    return "";
+  }
+  function overlayWrap(inner, wide){
+    return '<div class="overlay">' + '<div class="modal'+(wide?" wide":"")+'">' + inner + '</div>' + '</div>';
+  }
+  function field(labelKey, kind, name, value, opts){
+    opts = opts || {};
+    var span = opts.span2 ? ' span-2' : '';
+    var input = "";
+    if(kind === "select"){
+      input = '<select name="'+name+'">'+opts.options+'</select>';
+    } else {
+      input = '<input type="'+(opts.type||"text")+'" name="'+name+'" value="'+esc(value)+'"' +
+        (opts.required?" required":"") + (opts.step!=null?' step="'+opts.step+'"':"") + (opts.readonly?" readonly":"") +
+        (opts.placeholder?' placeholder="'+esc(opts.placeholder)+'"':"") + '/>';
+    }
+    return '<div class="field'+span+'"><label>'+esc(labelKey)+(opts.required?' <span class="req">*</span>':'')+'</label>'+input+(opts.hint?'<div class="hint">'+esc(opts.hint)+'</div>':'')+'</div>';
+  }
+  function fieldSelect(labelKey, name, value, pairs, required, hint, selectId){
+    var opts = pairs.map(function(p){ return '<option value="'+p[0]+'"'+(value===p[0]?" selected":"")+'>'+esc(p[1])+'</option>'; }).join("");
+    return '<div class="field"><label>'+esc(labelKey)+(required?' <span class="req">*</span>':'')+'</label><select name="'+name+'"'+(selectId?' id="'+selectId+'"':'')+'>'+opts+'</select>'+(hint?'<div class="hint">'+esc(hint)+'</div>':'')+'</div>';
+  }
+
+  function equipmentModalHtml(eq){
+    var isEdit = !!eq;
+    var v = eq || {id:"", tag:"", name:"", manufacturer:"", model:"", serial:"", unit:"", rangeMin:"", rangeMax:"", emp:"", area:AREAS[0], criticality:"Medium", frequencyMonths:12, lastCalibration:TODAY_STR, manualStatus:"Approved", siteId:state.currentSite, responsibleName:"", responsibleEmail:""};
+    var areaOpts = AREAS.map(function(a){ return '<option value="'+a+'"'+(v.area===a?" selected":"")+'>'+esc(areaLabel(a))+'</option>'; }).join("");
+    var siteOpts = SITES.map(function(s){ return '<option value="'+s.id+'"'+(v.siteId===s.id?" selected":"")+'>'+esc(s.name)+' — '+esc(regionLabel(s.region))+'</option>'; }).join("");
+
+    var errorHtml = state.formError ? '<div class="form-error">'+esc(state.formError)+'</div>' : "";
+
+    var inner = '' +
+      '<div class="modal-head"><div><h3>'+esc(isEdit?T("editEquipmentTitle"):T("addEquipmentTitle"))+'</h3><div class="sub">'+esc(T("assetMasterDataSub"))+' '+esc(siteName(v.siteId))+'</div></div></div>' +
+      '<form id="equipment-form" data-id="'+esc(v.id||"")+'">' +
+        '<div class="modal-body">' +
+          '<div class="form-grid">' +
+            field(T("f_equipmentId"),"input","code",isEdit?v.id:"",{required:true, readonly:isEdit, placeholder:"BRK-EQ-0009"}) +
+            field(T("f_assetTag"),"input","tag",v.tag,{required:true, placeholder:"PYR-IMM-02"}) +
+            field(T("f_equipmentName"),"input","name",v.name,{required:true, span2:true}) +
+            field(T("f_manufacturer"),"input","manufacturer",v.manufacturer,{required:true}) +
+            field(T("f_model"),"input","model",v.model,{required:true}) +
+            field(T("f_serial"),"input","serial",v.serial,{required:true}) +
+            field(T("f_manufacturingSite"),"select","siteId",v.siteId,{options:siteOpts}) +
+            field(T("f_unit"),"input","unit",v.unit,{required:true, placeholder:"°C, mm, kg…"}) +
+            field(T("f_rangeMin"),"input","rangeMin",v.rangeMin,{type:"number", step:"any", required:true, hint:T("hintRange")}) +
+            field(T("f_rangeMax"),"input","rangeMax",v.rangeMax,{type:"number", step:"any", required:true, hint:T("hintRange")}) +
+            field(T("f_tolerance"),"input","emp",v.emp,{required:true, placeholder:"± 0.02 mm", hint:T("hintTolerance")}) +
+            field(T("f_area"),"select","area",v.area,{options:areaOpts}) +
+            fieldSelect(T("f_criticality"),"criticality",v.criticality,[["High",T("critHigh")],["Medium",T("critMedium")],["Low",T("critLow")]],true,T("hintCriticality")) +
+            field(T("f_frequency"),"input","frequencyMonths",v.frequencyMonths,{type:"number", required:true, hint:T("hintFrequency")}) +
+            field(T("f_lastCal"),"input","lastCalibration",v.lastCalibration,{type:"date", required:true}) +
+            fieldSelect(T("f_status"),"manualStatus",v.manualStatus,[["Approved",statusLabel("Approved")],["Conditional",statusLabel("Conditional")],["Out of Service",statusLabel("Out of Service")]],true,T("hintStatus")) +
+          '</div>' +
+          '<fieldset><legend>'+esc(T("fieldsetResp"))+'</legend><div class="form-grid">' +
+            field(T("f_respName"),"input","responsibleName",v.responsibleName,{required:true, placeholder:"Full name"}) +
+            field(T("f_respEmail"),"input","responsibleEmail",v.responsibleEmail,{type:"email", required:true, placeholder:"name@bradken.com"}) +
+          '</div><div class="hint" style="margin-top:8px;">'+esc(T("respHint"))+'</div></fieldset>' +
+          errorHtml +
+        '</div>' +
+        '<div class="modal-foot">' +
+          '<button type="button" class="btn btn-ghost" data-action="close-modal">'+esc(T("cancel"))+'</button>' +
+          '<button type="submit" class="btn btn-primary">'+esc(isEdit?T("saveChanges"):T("addEquipmentSubmit"))+'</button>' +
+        '</div>' +
+      '</form>';
+    return overlayWrap(inner);
+  }
+
+  function eventModalHtml(payload){
+    var eqId = (payload && payload.eqId) || "";
+    var eq = state.equipment.filter(function(e){ return e.id === eqId; })[0];
+    var scoped = scopedEquipment();
+    var eqOpts = scoped.map(function(e){ return '<option value="'+e.id+'"'+(e.id===eqId?" selected":"")+'>'+esc(e.tag)+' — '+esc(e.name)+'</option>'; }).join("");
+    var errorHtml = state.formError ? '<div class="form-error">'+esc(state.formError)+'</div>' : "";
+    var calType = (payload && payload.calType) || ((eq&&/internal/i.test(eq.tech))?"Internal":"External");
+
+    var inner = '' +
+      '<div class="modal-head"><div><h3>'+esc(T("registerEventTitle"))+'</h3><div class="sub">'+(eq?esc(eq.tag)+' — '+esc(eq.name):esc(T("selectEquipmentSub")))+'</div></div></div>' +
+      '<form id="event-form">' +
+        '<div class="modal-body">' +
+          '<div class="field" style="margin-bottom:14px;"><label>'+esc(T("fieldEquipment"))+'</label><select name="eqId" id="event-eq-select">'+eqOpts+'</select></div>' +
+          '<div class="form-grid">' +
+            field(T("f_testDate"),"input","date",TODAY_STR,{type:"date", required:true}) +
+            fieldSelect(T("f_calibrationType"),"calibrationType",calType,[["Internal",T("typeInternal")],["External",T("typeExternal")]],true,T("hintCalType"),"event-caltype-select") +
+            field(T("f_performedBy"),"input","performedBy",eq?eq.responsibleName:"",{required:true, placeholder:"Full name", hint:T("performedByHint")}) +
+            (calType === "External" ? field(T("f_provider"),"input","provider",(eq && !/internal/i.test(eq.tech))?eq.tech:"",{required:true, span2:true, placeholder:T("providerPh")}) : "") +
+            field(T("f_traceCert"),"input","traceCert","",{required:true, span2:true, placeholder:T("traceCertPh"), hint:T("hintTraceCert")}) +
+            field(T("f_errorFound"),"input","errorFound","",{required:true, placeholder:T("errorFoundPh"), hint:T("hintErrorFound")}) +
+            field(T("f_uncertainty"),"input","uncertainty",eq?eq.uncertainty:"",{required:false, hint:T("hintUncertainty")}) +
+            fieldSelect(T("f_verdict"),"verdict","PASS",[["PASS",T("verdictPass")],["FAIL",T("verdictFail")]],true) +
+            field(T("f_qaApprover"),"input","qaApprover",eq?(REGION_QA_PARTNER[siteRegion(eq.siteId)]||""):"",{required:true, span2:true, placeholder:T("qaApproverPh")}) +
+          '</div>' +
+          errorHtml +
+        '</div>' +
+        '<div class="modal-foot">' +
+          '<button type="button" class="btn btn-ghost" data-action="close-modal">'+esc(T("cancel"))+'</button>' +
+          '<button type="submit" class="btn btn-primary">'+esc(T("saveGenerateCert"))+'</button>' +
+        '</div>' +
+      '</form>';
+    return overlayWrap(inner, true);
+  }
+
+  function confirmDeleteModalHtml(eq){
+    var histCount = (eq.calibrationHistory||[]).length;
+    var hasHistory = histCount > 0;
+    var warningHtml = hasHistory ?
+      '<div class="form-error" style="margin-top:10px;">'+esc(T("historyWarnPrefix"))+' '+histCount+' '+esc(histCount===1?T("historyWarnRecordSing"):T("historyWarnRecordPl"))+' '+esc(histCount===1?T("historyWarnOnFileSing"):T("historyWarnOnFilePl"))+' '+esc(T("historyWarnSuffix"))+'</div>' : '';
+    var confirmField = hasHistory ?
+      '<div class="field" style="margin-top:12px;"><label>'+esc(T("typeIdConfirm"))+' <span class="req">*</span></label>' +
+      '<input type="text" id="delete-confirm-input" data-expect="'+esc(eq.id)+'" placeholder="'+esc(eq.id)+'" autocomplete="off"/></div>' : '';
+    var inner = '' +
+      '<div class="modal-head"><h3>'+esc(T("deleteEquipmentTitle"))+'</h3></div>' +
+      '<div class="modal-body"><p style="margin:0 0 10px;">'+esc(T("deletePermanentAsset"))+esc(hasHistory?T("andHistory"):'')+' '+esc(T("fromSession"))+'</p>' +
+        '<div class="cell-sub mono">'+esc(eq.id)+' — '+esc(eq.tag)+' — '+esc(eq.name)+'</div>' +
+        warningHtml + confirmField +
+      '</div>' +
+      '<div class="modal-foot">' +
+        '<button type="button" class="btn btn-ghost" data-action="close-modal">'+esc(T("cancel"))+'</button>' +
+        '<button type="button" class="btn btn-danger" id="confirm-delete-btn" data-action="confirm-delete-equipment" data-id="'+eq.id+'"'+(hasHistory?" disabled":"")+'>'+esc(T("deleteBtn"))+'</button>' +
+      '</div>';
+    return overlayWrap(inner);
+  }
+
+  /* =====================================================================
+     TOAST
+  ===================================================================== */
+  var toastTimer = null;
+  function toastHtml(){
+    if(!state.toast) return "";
+    return '<div style="position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--surface);padding:10px 18px;border-radius:var(--radius-sm);font-size:12.5px;font-weight:600;box-shadow:var(--shadow-md);z-index:200;">'+esc(state.toast)+'</div>';
+  }
+  function showToast(msg){
+    state.toast = msg; render();
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ state.toast = null; render(); }, 2400);
+  }
+
+  /* =====================================================================
+     CERTIFICATE VIEW
+  ===================================================================== */
+  function certificateViewHtml(cert){
+    var eq = cert.equipment, ev = cert.event;
+    var verdictOk = ev.verdict === "PASS";
+    var pseudoHash = Math.abs(hashCode(ev.certificateId+ev.date)).toString(16).padStart(8,"0");
+
+    return '' +
+    '<div class="cert-actions no-print">' +
+      '<button class="btn btn-ghost" data-action="close-certificate">'+esc(T("back"))+'</button>' +
+      '<button class="btn btn-primary" data-action="print-cert">'+esc(T("printSavePdf"))+'</button>' +
+    '</div>' +
+    '<div class="certificate-container">' +
+      '<div class="cert-top">' +
+        '<div class="cert-brand">' + logoMarkSvg() +
+          '<div><h2>BRADKEN</h2><div class="site-line">'+esc(siteName(eq.siteId))+' '+esc(T("certSiteLine"))+'</div></div>' +
+        '</div>' +
+        '<div class="cert-id-box"><div>'+esc(T("certNo"))+'</div><b>'+esc(ev.certificateId)+'</b>' +
+          '<div style="margin-top:6px;">'+esc(T("issueDate"))+'</div><b>'+esc(fmtDate(ev.date))+'</b></div>' +
+      '</div>' +
+      '<div class="cert-title"><h1>'+esc(T("certTitle"))+'</h1><div class="subt">'+esc(T("certSubtitle"))+'</div></div>' +
+
+      '<div class="cert-section"><h4>'+esc(T("sectEquipment"))+'</h4><div class="cert-kv">' +
+        kv(T("kTag"), eq.tag) + kv(T("kName"), eq.name) +
+        kv(T("kBrandModel"), eq.manufacturer+" / "+eq.model) + kv(T("kSerial"), eq.serial) +
+        kv(T("kSiteArea"), siteName(eq.siteId)+" / "+areaLabel(eq.area)) + kv(T("kFrequency"), eq.frequencyMonths+" "+T("kFrequencyUnit")) +
+      '</div></div>' +
+
+      '<div class="cert-section"><h4>'+esc(T("sectResults"))+'</h4>' +
+        '<table class="cert-table"><thead><tr><th>'+esc(T("parameter"))+'</th><th>'+esc(T("value"))+'</th></tr></thead><tbody>' +
+          '<tr><td>'+esc(T("toleranceRow"))+'</td><td>'+esc(eq.emp)+'</td></tr>' +
+          '<tr><td>'+esc(T("errorFoundRow"))+'</td><td>'+esc(ev.errorFound)+'</td></tr>' +
+          '<tr><td>'+esc(T("uncertaintyRow"))+'</td><td>'+esc(ev.uncertainty||"—")+'</td></tr>' +
+          '<tr><td>'+esc(T("verdictRow"))+'</td><td><span class="cert-verdict" style="color:'+(verdictOk?"var(--ok)":"var(--crit)")+';background:'+(verdictOk?"var(--ok-bg)":"var(--crit-bg)")+';border-color:'+(verdictOk?"var(--ok-border)":"var(--crit-border)")+'">'+esc(verdictShort(ev.verdict))+'</span></td></tr>' +
+        '</tbody></table>' +
+      '</div>' +
+
+      '<div class="cert-section"><h4>'+esc(T("sectTraceability"))+'</h4>' +
+        '<div class="cert-kv"><div class="row"><span class="k">'+esc(T("f_calibrationType"))+'</span><span class="v">'+esc(calTypeLabel(ev.calibrationType))+'</span></div>' +
+        '<div class="row"><span class="k">'+esc(T("providerRow"))+'</span><span class="v">'+esc(ev.provider)+'</span></div>' +
+        '<div class="row"><span class="k">'+esc(T("traceCertRow"))+'</span><span class="v">'+esc(ev.traceCert)+'</span></div></div>' +
+      '</div>' +
+
+      '<div class="cert-section"><h4>'+esc(T("sectApproval"))+'</h4><div class="cert-sign-row">' +
+        '<div class="sign-box"><div class="sign-name">'+esc(ev.performedBy||"—")+'</div><div class="sign-role">'+esc(T("calibratedByRole"))+'</div><div class="sign-meta">'+esc(ev.provider)+' · '+esc(fmtDate(ev.date))+'</div></div>' +
+        '<div class="sign-box"><div class="sign-name">'+esc(ev.qaApprover||"—")+'</div><div class="sign-role">'+esc(T("approvedByRole"))+'</div><div class="sign-meta">'+esc(T("digitallySigned"))+' · '+pseudoHash+'</div></div>' +
+      '</div></div>' +
+
+      '<div class="cert-foot"><span>'+esc(T("certFoot1"))+'</span><span>'+esc(T("certFoot2"))+'</span></div>' +
+    '</div>';
+  }
+  function kv(k,v){ return '<div class="row"><span class="k">'+esc(k)+'</span><span class="v">'+esc(v)+'</span></div>'; }
+  function hashCode(str){ var h=0; for(var i=0;i<str.length;i++){ h=(h<<5)-h+str.charCodeAt(i); h|=0; } return h; }
+
+  /* =====================================================================
+     EVENT HANDLING (delegated)
+  ===================================================================== */
+  function findEq(id){ return state.equipment.filter(function(e){ return e.id === id; })[0]; }
+
+  app.addEventListener("click", function(e){
+    var overlay = e.target.closest(".overlay");
+    if(overlay && e.target === overlay){ closeModal(); return; }
+
+    var t = e.target.closest("[data-action]");
+    if(!t) return;
+    var action = t.dataset.action;
+
+    switch(action){
+      case "nav":
+        state.currentView = t.dataset.view; state.certificate = null; render();
+        break;
+      case "open-add-equipment":
+        state.formError = null; state.modal = {type:"equipment", data:null}; render();
+        break;
+      case "edit-equipment":
+        state.formError = null; state.modal = {type:"equipment", data: findEq(t.dataset.id)}; render();
+        break;
+      case "delete-equipment":
+        state.modal = {type:"confirm-delete", data: findEq(t.dataset.id)}; render();
+        break;
+      case "confirm-delete-equipment":
+        deleteEquipment(t.dataset.id);
+        break;
+      case "close-modal":
+        closeModal();
+        break;
+      case "open-event": {
+        var fallback = filteredSortedEquipment()[0] || scopedEquipment()[0];
+        state.formError = null;
+        state.modal = {type:"event", data:{eqId: t.dataset.id || (fallback && fallback.id)}};
+        render();
+        break;
+      }
+      case "sort":
+        if(state.sortKey === t.dataset.key){ state.sortDir = state.sortDir === "asc" ? "desc" : "asc"; }
+        else { state.sortKey = t.dataset.key; state.sortDir = "asc"; }
+        render();
+        break;
+      case "view-cert":
+        openCertificate(t.dataset.eq, t.dataset.ev);
+        break;
+      case "close-certificate":
+        state.certificate = null; render();
+        break;
+      case "print-cert":
+        window.print();
+        break;
+      case "set-range":
+        state.scheduleRange = Number(t.dataset.range); render();
+        break;
+      case "cal-prev":
+        state.calendarMonthOffset--; render();
+        break;
+      case "cal-next":
+        state.calendarMonthOffset++; render();
+        break;
+      case "select-day":
+        state.selectedDay = state.selectedDay === t.dataset.day ? null : t.dataset.day; render();
+        break;
+      case "clear-day":
+        state.selectedDay = null; render();
+        break;
+      case "goto-site":
+        state.currentSite = t.dataset.site; state.currentView = "dashboard"; state.certificate = null; render();
+        break;
+      case "toggle-auth-mode":
+        state.authMode = state.authMode === "signup" ? "login" : "signup";
+        state.authError = null; state.authNotice = null; render();
+        break;
+      case "sign-out":
+        sb.auth.signOut();
+        break;
+      case "retry-load":
+        loadData();
+        break;
+    }
+  });
+
+  app.addEventListener("change", function(e){
+    var el = e.target;
+    if(el.id === "site-select"){ state.currentSite = el.value; render(); return; }
+    if(el.id === "lang-select"){ state.lang = el.value; render(); return; }
+    if(el.dataset.bind === "filter-status"){ state.filters.status = el.value; render(); return; }
+    if(el.dataset.bind === "filter-criticality"){ state.filters.criticality = el.value; render(); return; }
+    if(el.dataset.bind === "filter-area"){ state.filters.area = el.value; render(); return; }
+    if(el.id === "event-eq-select"){
+      var eq = findEq(el.value);
+      if(eq && state.modal){ state.modal.data = {eqId: eq.id}; render(); }
+      return;
+    }
+    if(el.id === "event-caltype-select"){
+      if(state.modal){ state.modal.data = state.modal.data || {}; state.modal.data.calType = el.value; render(); }
+      return;
+    }
+  });
+
+  app.addEventListener("input", function(e){
+    if(e.target.id === "search-input"){ state.searchQuery = e.target.value; render(); return; }
+    if(e.target.id === "delete-confirm-input"){
+      var btn = document.getElementById("confirm-delete-btn");
+      if(btn) btn.disabled = (e.target.value !== e.target.dataset.expect);
+      return;
+    }
+  });
+
+  app.addEventListener("submit", function(e){
+    e.preventDefault();
+    if(e.target.id === "equipment-form") saveEquipmentForm(e.target);
+    else if(e.target.id === "event-form") saveEventForm(e.target);
+    else if(e.target.id === "auth-form") submitAuthForm(e.target);
+  });
+
+  function submitAuthForm(form){
+    var fd = new FormData(form);
+    var email = (fd.get("email")||"").trim();
+    var password = fd.get("password")||"";
+    var isSignup = state.authMode === "signup";
+    state.authError = null; state.authNotice = null; state.authBusy = true; render();
+
+    var p = isSignup
+      ? sb.auth.signUp({ email: email, password: password, options: { data: { full_name: (fd.get("fullName")||"").trim() } } })
+      : sb.auth.signInWithPassword({ email: email, password: password });
+
+    p.then(function(res){
+      state.authBusy = false;
+      if(res.error){ state.authError = res.error.message; render(); return; }
+      if(isSignup && !(res.data && res.data.session)){
+        state.authNotice = T("authCheckEmail");
+        state.authMode = "login";
+        render();
+        return;
+      }
+      // onAuthStateChange handles the session + data load.
+      render();
+    });
+  }
+
+  function closeModal(){ state.modal = null; state.formError = null; render(); }
+
+  function saveEquipmentForm(form){
+    var fd = new FormData(form);
+    var existingId = form.dataset.id;
+    var code = (fd.get("code")||"").trim();
+    var required = ["code","tag","name","manufacturer","model","serial","siteId","unit","rangeMin","rangeMax","emp","frequencyMonths","lastCalibration","responsibleName","responsibleEmail"];
+    for(var i=0;i<required.length;i++){
+      var val = fd.get(required[i]);
+      if(val == null || String(val).trim() === ""){
+        state.formError = T("errRequired");
+        render();
+        return;
+      }
+    }
+    if(!existingId && findEq(code)){
+      state.formError = T("errDuplicateId");
+      render();
+      return;
+    }
+    var emailVal = fd.get("responsibleEmail").trim();
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)){
+      state.formError = T("errInvalidEmail");
+      render();
+      return;
+    }
+
+    var data = {
+      tag: fd.get("tag").trim(),
+      name: fd.get("name").trim(),
+      manufacturer: fd.get("manufacturer").trim(),
+      model: fd.get("model").trim(),
+      serial: fd.get("serial").trim(),
+      siteId: fd.get("siteId"),
+      unit: fd.get("unit").trim(),
+      rangeMin: Number(fd.get("rangeMin")),
+      rangeMax: Number(fd.get("rangeMax")),
+      emp: fd.get("emp").trim(),
+      area: fd.get("area"),
+      criticality: fd.get("criticality"),
+      frequencyMonths: Number(fd.get("frequencyMonths")),
+      lastCalibration: fd.get("lastCalibration"),
+      manualStatus: fd.get("manualStatus"),
+      responsibleName: fd.get("responsibleName").trim(),
+      responsibleEmail: emailVal
+    };
+    data.nextCalibration = addMonths(data.lastCalibration, data.frequencyMonths);
+
+    var row = eqToRow(data);
+    var p = existingId
+      ? sb.from("equipment").update(row).eq("id", existingId)
+      : sb.from("equipment").insert(Object.assign({id: code}, row));
+
+    p.then(function(res){
+      if(res.error){ state.formError = res.error.message; render(); return; }
+      if(existingId){
+        var eq = findEq(existingId);
+        Object.assign(eq, data);
+      } else {
+        data.id = code;
+        data.tech = ""; data.traceCert = ""; data.uncertainty = "";
+        data.calibrationHistory = [];
+        state.equipment.push(data);
+      }
+      // Keep the saved equipment visible even if it was assigned to a different manufacturing site.
+      state.currentSite = data.siteId;
+      state.modal = null; state.formError = null;
+      render();
+      showToast(T("toastEquipmentSaved"));
+    });
+  }
+
+  function deleteEquipment(id){
+    sb.from("equipment").delete().eq("id", id).then(function(res){
+      if(res.error){ state.formError = res.error.message; render(); return; }
+      state.equipment = state.equipment.filter(function(e){ return e.id !== id; });
+      state.modal = null; render(); showToast(T("toastEquipmentDeleted"));
+    });
+  }
+
+  function saveEventForm(form){
+    var fd = new FormData(form);
+    var eqId = fd.get("eqId");
+    var eq = findEq(eqId);
+    if(!eq) return;
+    var calType = fd.get("calibrationType");
+    var required = ["date","calibrationType","performedBy","traceCert","errorFound","verdict","qaApprover"];
+    if(calType === "External") required.push("provider");
+    for(var i=0;i<required.length;i++){
+      var val = fd.get(required[i]);
+      if(val == null || String(val).trim() === ""){
+        state.formError = T("errRequired");
+        render();
+        return;
+      }
+    }
+
+    var date = fd.get("date");
+    var verdict = fd.get("verdict");
+    var providerVal = calType === "External" ? fd.get("provider").trim() : ("Internal — " + siteName(eq.siteId) + " Metrology Team");
+    var event = {
+      date: date,
+      calibrationType: calType,
+      performedBy: fd.get("performedBy").trim(),
+      provider: providerVal,
+      traceCert: fd.get("traceCert").trim(),
+      errorFound: fd.get("errorFound").trim(),
+      uncertainty: fd.get("uncertainty").trim(),
+      verdict: verdict,
+      qaApprover: fd.get("qaApprover").trim(),
+      certificateId: nextCertId(eq.siteId, date)
+    };
+    var nextCal = addMonths(date, eq.frequencyMonths);
+    var newStatus = verdict === "PASS" ? "Approved" : "Out of Service";
+
+    var eventRow = {
+      equipment_id: eq.id, date: event.date, calibration_type: event.calibrationType,
+      performed_by: event.performedBy, provider: event.provider, trace_cert: event.traceCert,
+      error_found: event.errorFound, uncertainty: event.uncertainty, verdict: event.verdict,
+      qa_approver: event.qaApprover, certificate_id: event.certificateId
+    };
+
+    sb.from("calibration_events").insert(eventRow).select().single().then(function(res){
+      if(res.error){ state.formError = res.error.message; render(); return; }
+      event.id = res.data.id;
+      return sb.from("equipment").update({
+        last_calibration: date, next_calibration: nextCal, manual_status: newStatus
+      }).eq("id", eq.id).then(function(res2){
+        if(res2.error){ state.formError = res2.error.message; render(); return; }
+        eq.calibrationHistory = eq.calibrationHistory || [];
+        eq.calibrationHistory.unshift(event);
+        eq.lastCalibration = date;
+        eq.nextCalibration = nextCal;
+        eq.manualStatus = newStatus;
+        eq.tech = event.provider; eq.traceCert = event.traceCert; eq.uncertainty = event.uncertainty;
+
+        state.modal = null; state.formError = null;
+        openCertificate(eq.id, event.id);
+      });
+    });
+  }
+
+  function openCertificate(eqId, evId){
+    var eq = findEq(eqId);
+    if(!eq) return;
+    var ev = (eq.calibrationHistory||[]).filter(function(h){ return h.id === evId; })[0];
+    if(!ev) return;
+    state.certificate = {equipment: eq, event: ev};
+    state.currentView = "events";
+    render();
+  }
+
+  /* =====================================================================
+     INIT
+  ===================================================================== */
+  function loadProfile(userId){
+    return sb.from("profiles").select("*").eq("id", userId).single().then(function(res){
+      if(res.error){ state.profile = null; return; }
+      state.profile = { id: res.data.id, email: res.data.email, fullName: res.data.full_name, role: res.data.role };
+    });
+  }
+
+  function loadData(){
+    state.dataLoading = true; state.loadError = null; render();
+    return Promise.all([
+      sb.from("equipment").select("*"),
+      sb.from("calibration_events").select("*").order("date", {ascending:false})
+    ]).then(function(results){
+      var eqRes = results[0], evRes = results[1];
+      if(eqRes.error) throw eqRes.error;
+      if(evRes.error) throw evRes.error;
+      var equipment = eqRes.data.map(eqFromRow);
+      var byEqId = {};
+      equipment.forEach(function(eq){ byEqId[eq.id] = eq; });
+      evRes.data.forEach(function(row){
+        var eq = byEqId[row.equipment_id];
+        if(!eq) return;
+        eq.calibrationHistory.push(evFromRow(row));
+      });
+      equipment.forEach(function(eq){
+        if(eq.calibrationHistory.length){
+          var latest = eq.calibrationHistory[0];
+          eq.tech = latest.provider; eq.traceCert = latest.traceCert; eq.uncertainty = latest.uncertainty;
+        }
+      });
+      state.equipment = equipment;
+      state.dataLoading = false;
+      render();
+    }).catch(function(err){
+      state.dataLoading = false;
+      state.loadError = (err && err.message) || String(err);
+      render();
+    });
+  }
+
+  function onSignedOut(){
+    state.session = null; state.profile = null; state.equipment = []; state.dataLoading = false;
+    render();
+  }
+
+  render();
+
+  sb.auth.onAuthStateChange(function(_event, session){
+    if(session){
+      var isNewUser = !state.session || state.session.user.id !== session.user.id;
+      state.session = session;
+      if(isNewUser){
+        render();
+        loadProfile(session.user.id).then(loadData);
+      }
+    } else if(state.session){
+      onSignedOut();
+    } else {
+      state.session = null; render();
+    }
+  });
+})();
+</script>
